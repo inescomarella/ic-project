@@ -1,4 +1,7 @@
-###Tutorial ocupacao Ines modif
+##### Script modified based on TutorialOcupacaoInes.R sent by Marina Zanin in November 11th, 2019.
+##### This is script aims to model occupancy based heterogeneous sites, it was developed originally to run camera-tra data of carnivores in a fragmented landscape
+##### The analysis are made individually to each species. The script has two parts, the first part is to develop the model detections and to analyse the influence of co-variates in the species detection per site, the second part is to develop the occupancy models itself based on the detection model selected in the previous step.
+
 
 library(readxl)
 library(vegan)
@@ -6,40 +9,34 @@ library(unmarked)
 library(MuMIn)
 library(plotrix)
 
-#########################################################
-#1. Importando as vari?veis explanat?rias e co-vari?veis
-# Essa etapa ? igual para todas as esp?cies
-#########################################################
-library(readxl)
-VariaveisExp <- read_excel("C:/PROJETO IC/AnalisesR/VariaveisExp.xlsx", sheet = "VarExp")
+
+#### 1. Importing explanatory variables and co-variables ####
+#### This step is equal to all species
+
+VariaveisExp <- read_excel("./data/VariaveisExp.xlsx", sheet = "VarExp")
 View(VariaveisExp)
 Var <- VariaveisExp[, c(5:8, 10)]
 Var <- cbind(Var, VariaveisExp[, 14] + VariaveisExp[, 15])
 View(Var)
-Var <-
-  decostand(Var, method = "standardize", MARGIN = 2) ##padronizando os dados
+Var <- decostand(Var, method = "standardize", MARGIN = 2) # standardizing data
 
-#########################################################
-#2. Importando dados das esp?cies e criando os arquivos para ser rodados
-# Essa etapa DIFERE ENTRE ESP?CIES
-#########################################################
 
-#2.1. Importando arquivo da esp?cie
-library(readxl)
+#### 2. Importing the species data and preparing data #####
+#### This step is different to each species
 
-cfm <- read_excel("C:/PROJETO IC/AnalisesR/TABELA DE OCASIAO_7x1.xlsx",
+## 2.1. Importing species data ####
+cfm <- read_excel("./data/occu-7x1.xlsx",
                       sheet = "Canis lupus familiaris")
 cfm <- cfm[,-1]
 View(cfm)
 
-#2.2. criando uma matriz final para ser lida no unmarked - planilha de dados
-cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)  	 ###Organizes detection, non-detection data along with the covariates
-summary(cfm.umf) 	###summary() is a generic function used to produce result summaries of various model fitting functions.
+## 2.2. Creating a final matix to be read by unmarked - data table ####
+cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
+summary(cfm.umf)
 
-#########################################################
-#3. Gerando os modelos de detec??o (primeira fun??o que iremos avaliar)
-# Essa etapa DIFERE ENTRE ESP?CIES - como exemplo rodei para canis familiaris. Mude o nome dos arquivos
-#########################################################
+
+#### 3. Detection modeling ####
+#### This step is different to each species
 
 #3.1. Etapa um da detec??o: Avalia??o se a detec??o n?o tem vi?s nulo (dec1), ? influenciada pelo tempo
 #de atividade das AFs (dec2), ou pelas co-vari?veis (dec3)
