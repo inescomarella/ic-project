@@ -1,6 +1,6 @@
 ##### Script modified based on TutorialOcupacaoInes.R sent by Marina Zanin in November 11th, 2019.
 ##### This is script aims to model occupancy based heterogeneous sites, it was developed originally to run camera-tra data of carnivores in a fragmented landscape
-##### The analysis are made individually to each species. The script has two parts, the first part is to develop the model detections and to analyse the influence of co-variates in the species detection per site, the second part is to develop the occupancy models itself based on the detection model selected in the previous step.
+##### The analysis are made individually to each species. The script has two parts, the first part is to develop the model detections and to analyse the influence of covariates in the species detection per site, the second part is to develop the occupancy models itself based on the detection model selected in the previous step.
 
 
 library(readxl)
@@ -10,8 +10,8 @@ library(MuMIn)
 library(plotrix)
 
 
-#### 1. Importing explanatory variables and co-variables ####
-#### This step is equal to all species
+#### 1. Importing explanatory variables and covariates ####
+#### This first step is equal to all species
 
 VariaveisExp <- read_excel("./data/VariaveisExp.xlsx", sheet = "VarExp")
 View(VariaveisExp)
@@ -22,7 +22,7 @@ Var <- decostand(Var, method = "standardize", MARGIN = 2) # standardizing data
 
 
 #### 2. Importing the species data and preparing data #####
-#### This step is different to each species
+#### From now on the analyses is DIFFERENT to each species
 
 ## 2.1. Importing species data ####
 cfm <- read_excel("./data/occu-7x1.xlsx",
@@ -35,29 +35,26 @@ cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
 summary(cfm.umf)
 
 
-#### 3. Detection modeling ####
-#### This step is different to each species
+#### 3. DETECTION MODELING ####
 
-#3.1. Etapa um da detec??o: Avalia??o se a detec??o n?o tem vi?s nulo (dec1), ? influenciada pelo tempo
-#de atividade das AFs (dec2), ou pelas co-vari?veis (dec3)
+## 3.1. Evaluate the detection bias, if it is null (dec1), if it is influenced by time (dec2), or by the co-variates (dec3) ####
 
-dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf)    ###This function fits the single season occupancy model of MacKenzie et al (2002).
+dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf)
 dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf)
 dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
 
-#criar uma lista de modelos
+# Creating a list of models
 dec.list.cfm <-
   fitList(
     "psi(.)p(.)" = dec1.cfm,
     "psi(.)p(t)" = dec2.cfm,
     "psi(.)p(var)" = dec3.cfm)
-        # Ordenar pelo AIC
         ms.dec.cfm <- modSel(dec.list.cfm)
-        ms.dec.cfm
+        ms.dec.cfm   # Ordered by AIC
 
-#3.2. Caso o modelo selecionado (delta<2) seja "psi(.)p(var)", desmembrar a fun??o dec3 segundo crit?rio de AIC
+## 3.2. If the detection model selected is influenced by the covariates "psi(.)p(var)", then it is necessary to dredge the function dec3 according to Akaike criterion ####
         dd.cfm <- dredge(dec3.cfm)
-        dd.cfm ### analizar segundo os crit?rios de akaike
+        dd.cfm   # Ordered by AIC
         write.table(
           dd.cfm,
           file =
@@ -92,8 +89,9 @@ dec.list.cfm <-
 write.table(importancia.var.cfm, file =
               "C:/PROJETO IC/AnalisesR/Resultados 10x1/p_var/llongicaudis-10x1-importancia.var.cfm.csv", sep = ",", row.names = TRUE, col.names = NA)
 
-{
-  par(mfrow = c(2, 2))
+## creating the graphs
+
+{par(mfrow = c(2, 2))
   op <-
     par(
       mfrow = c(2, 2),
@@ -102,8 +100,7 @@ write.table(importancia.var.cfm, file =
       xpd = NA
     )
 
-  {
-    plotCI(
+  {plotCI(
       x = 1:5,
       y = importancia.var.cfm[, 1],
       uiw = importancia.var.cfm[, 2],
@@ -130,8 +127,7 @@ write.table(importancia.var.cfm, file =
     )
     }
 
-  {
-    plotCI(
+  {plotCI(
       x = 1:5,
       y = importancia.var.cfm[, 3],
       uiw = importancia.var.cfm[, 4],
@@ -157,8 +153,7 @@ write.table(importancia.var.cfm, file =
     )
   }
 
-  {
-    plotCI(
+  {plotCI(
       x = 1:5,
       y = importancia.var.cfm[, 5],
       uiw = importancia.var.cfm[, 6],
@@ -186,39 +181,40 @@ write.table(importancia.var.cfm, file =
 
   binomnames.det <-
     expression(bold(paste(
-      "Vari?veis de detec??o - ", italic("Eira barbara"), ""
+      "Variáveis de detecção - ", italic("Eira barbara"), ""
     )))
   title(binomnames.det, line = 1, outer = TRUE)
 }
 
-# ~ ele+DistBorda_PLAN+RAI_Hum ~ RS1+RS2+RS3+RAI_Hum
+#Just to remember the covariates: ~ ele+DistBorda_PLAN+RAI_Hum ~ RS1+RS2+RS3+RAI_Hum
 
-#3.3. Escrevendo fun??o final e avaliando os resultados de vi?s de detec??o
+## 3.3. Final model detection function, evaluating detection bias ####
+# write here the final function ( ~ detection ~ occupancy), consider the occupancy null
 dec.sel.cfm <-
-  occu( ~ 1 ~ 1, cfm.umf)##escrever modelo de detec??o final aqui
+  occu( ~ 1 ~ 1, cfm.umf)
 
 det.cfm.pred <-
-  predict(dec.sel.cfm, type = "det", appendData = TRUE)###valores de detec??o por local, se eu quisezze extrapolar, bastava inserir outra base de dados
+  predict(dec.sel.cfm, type = "det", appendData = TRUE) # Detection values per site, it can be extrapolated to a differente data base
 colMeans(det.cfm.pred[,1:4])
 write.table(det.cfm.pred, file =
               "C:/PROJETO IC/AnalisesR/Resultados 10x1/DeteccaoUA/llongicaudis-10x1-p(.)-det.cfm.pred.csv", sep = ",", row.names = TRUE, col.names = NA)
 
 
-#########################################
-#4.       MODELO DE OCUPA??O
-##########################################
+#### 4. OCCUPANCY MODELING ####
 
-#4.1. avaliando vari?veis
-#OBS: Primeira fun??o ? a fun??o de detec??o que foi selecionada na etapa anterior. Nesse caso, a fun??o ? a nula
+## 4.1. Evaluating the occupancy bias based on the covariates ####
+# Use the detection model function selected in the previous step ( ~ detection ~ occupancy)
+
 ocu.cfm <-
-  occu( ~ 1 ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)####COLOCAR VARIAVEIS DO modelo de detec??o
+  occu( ~ 1 ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
 dd.ocu.cfm <- dredge(ocu.cfm)
-dd.ocu.cfm ### analizar segundo os crit?rios de akaike
+dd.ocu.cfm # Ordered by AIC
 write.table(dd.ocu.cfm, file =
               "C:/PROJETO IC/AnalisesR/Resultados 10x1/Ocupacao1/llongicaudis-10x1-dd.ocu.cfm.csv", sep = ",", row.names = TRUE, col.names = NA)
 
 
-#4.2. Caso haja mais de um modelo como fun??o explanat?ria, fazer a avalia??o baseada na m?dia e intervalo de confian?a
+## 4.2. If more than one model is a explanatory function (according to AIC), then evaluate the models based on the mean and standard deviation ####
+
 table.ocu <- as.matrix(dd.ocu.cfm)
 OCU.importancia.var.cfm <- matrix(NA, nrow = ncol(table.ocu) - 5, ncol =
                                     6)
@@ -255,8 +251,7 @@ write.table(OCU.importancia.var.cfm, file =
       xpd = NA
     )
 
-  {
-    plotCI(
+  {plotCI(
       x = 1:(ncol(table.ocu) - 5),
       y = OCU.importancia.var.cfm[, 1],
       uiw = OCU.importancia.var.cfm[, 2],
@@ -282,8 +277,7 @@ write.table(OCU.importancia.var.cfm, file =
     )
     }
 
-  {
-    plotCI(
+  {plotCI(
       x = 1:(ncol(table.ocu) - 5),
       y = OCU.importancia.var.cfm[, 3],
       uiw = OCU.importancia.var.cfm[, 4],
@@ -309,9 +303,7 @@ write.table(OCU.importancia.var.cfm, file =
     )
   }
 
-
-  {
-    plotCI(
+  {plotCI(
       x = 1:(ncol(table.ocu) - 5),
       y = OCU.importancia.var.cfm[, 5],
       uiw = OCU.importancia.var.cfm[, 6],
@@ -339,17 +331,16 @@ write.table(OCU.importancia.var.cfm, file =
 
   binomnames.ocu <-
     expression(bold(paste(
-      "Vari?veis de ocupa??o - ", italic("Eira barbara"), ""
+      "Variáveis de ocupação - ", italic("Eira barbara"), ""
     )))
   title(binomnames.ocu, line = 1, outer = TRUE)
 }
-# ~ ele+DistBorda_PLAN+RAI_Hum ~ RS1+RS2+RS3+RAI_Hum
+# Just to remember the covariates: ~ ele+DistBorda_PLAN+RAI_Hum ~ RS1+RS2+RS3+RAI_Hum
 
-#4.3. Escrevendo fun??o final e avaliando os resultados da ocupa??o
-#OBS: ESCREVER A FUN??O TANTO DE OCUPA??O QUANTO A DE DETEC??O ABAIXO
-
+## 4.3. Final occupancy model function ####
+# Write here the final function ( ~ detection ~ occupancy), based on previous  step
 ocu.sel.cfm <-
-  occu( ~ 1 ~ RS3, cfm.umf) ##escrever modelo de ocupacao final aqui
+  occu( ~ 1 ~ RS3, cfm.umf)
 ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
 colMeans(ocu.pred.cfm)
 write.table(ocu.pred.cfm, file =
