@@ -71,7 +71,7 @@ saveWorkbook(data, "./data/occu-1x1.xlsx", overwrite = TRUE)
 
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Generating a species list name -> METADATA
+# Creating a species name list -> METADATA
 
 original_names <- getSheetNames("./data/TABELA DE OCASIAO_1x1.xlsx")
 metadata_matrix <- cbind(original_names, sheet_names)
@@ -82,7 +82,7 @@ wb <- createWorkbook()
 addWorksheet(wb, "Sheet 1")
 writeDataTable(wb, "Sheet 1", x = metadata_df)
 saveWorkbook(wb, "./data/species-names.xlsx", overwrite = TRUE)
-openXL("./data/species-names.xlsx")
+openXL("./data/species-names.xlsx") # open file
 
 
 
