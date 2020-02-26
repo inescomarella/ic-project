@@ -15,6 +15,7 @@ sheet_names <-
     "sp8",
     "sp9",
     "sp10")
+
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Occasion 10x1 ----
 
@@ -68,6 +69,20 @@ for (i in 1:10) {
 # Saving the modifications
 saveWorkbook(data, "./data/occu-1x1.xlsx", overwrite = TRUE)
 
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Generating a species list name -> METADATA
+
+original_names <- getSheetNames("./data/TABELA DE OCASIAO_1x1.xlsx")
+metadata_matrix <- cbind(original_names, sheet_names)
+metadata_df <- as.data.frame(metadata_matrix)
+metadata_df
+
+wb <- createWorkbook()
+addWorksheet(wb, "Sheet 1")
+writeDataTable(wb, "Sheet 1", x = metadata_df)
+saveWorkbook(wb, "./data/species-names.xlsx", overwrite = TRUE)
+openXL("./data/species-names.xlsx")
 
 
 
