@@ -89,4 +89,40 @@ for (i in 1:n_det_models) {
 }
 
 
-####
+#### Juntando os dados de acordo com  tipo de dado -----
+# Criando o workbook do output1
+det_m_wb <- createWorkbook()
+sheet  <- createSheet(wb, sheetName="det_models")
+
+# Para reconhecer o nome parcial dos arquivos
+det_models <- apropos("detection-models")
+n_det_models <- length(det_models)
+
+# Adicionando os outputs
+for (i in 1:n_det_models) {
+  if (i == 1)
+    det_models_all <- data.frame(det_models[[i]])
+      else
+    addDataFrame(det_model[[1]],
+                 sheet,
+                 startRow  = 1
+                startColumn = 1)
+}
+
+
+det_m <- createWorkbook()
+sheet  <- createSheet(wb, sheetName="det_models")
+data <- data.frame(det_models[[i]])
+addDataFrame(data, sheet, startRow=3)
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+datalist = list()
+
+for (i in 1:(n_det_models)) {
+  dat <- det_models
+  datalist[[i]] <- dat # add it to your list
+}
+
+big_data <- dplyr::bind_rows(datalist)
+# or big_data <- data.table::rbindlist(datalist)
