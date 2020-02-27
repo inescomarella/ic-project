@@ -8,136 +8,12 @@
 # I can analyse each occasion separately what will reduce my output to 40 (different species per occasion), but I was also curious about comparing among different occasion, in this case I'll add 10 outputs (different occasions per species)
 # First I'll consider one occasion, so I'll compare the species, then I'll compare the different occasions response in each species.
 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORTANTE: versão atualizada do Java, com mesma arquitetura do R (no meu caso, x64 bit)
-# Após baixado rode o comando no terminal:
-setx PATH "C:/Program Files/Java/jre1.8.0_241/bin/server;%PATH%"
-# Em seguida no R, rode:
-Sys.setenv(JAVA_HOME = 'C:\\Program Files\\Java\\jre1.8.0_241')
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-# packages necessary to run "xlsx" package
-install.packages(c("rJava", "xlsxjars", "xlsx"))
-
-library(rJava)
-library(xlsxjars)
-library(xlsx)
-
-# Lendo os dados da primeira espécie para criar o arquivo
-det_models <-
-  read.csv(file = "./output/detection-models-10x1-sp1.csv")
-det_pVar <-
-  read.csv(file = "./output/detection-pVar-10x1-sp1.csv")
-det_covar <-
-  read.csv(file = "./output/detection-covariates-10x1-sp1.csv")
-det_persite <-
-  read.csv(file = ".output/detection-persite-10x1-sp1-p(.).csv")
-occu_models <-
-  read.csv(file = "./output/occupancy-models-10x1-sp1.csv")
-occu_pVar <-
-  read.csv(file = "./output/occupancy-pVar-10x1-sp1.cfm.csv")
-occu_persite <-
-  read.csv(file = "./output/occupancy-persite-10x1-sp1-p(.)psi(RS3).csv")
-
-# Criando o arquivo e as páginas de acordo com os dados da primeira espécie
-xlsx.writeMultipleData <-
-  function ("./results/occupancy-model-OCCASION",
-            c(det_models,
-              det_pVar,
-              detcovar,
-              det_persite,
-              occu_models,
-              occu_pVar,
-              occu_persite))
-  {
-    require(xlsx, quietly = TRUE)
-    objects <-
-      list(det_models,
-           det_pVar,
-           detcovar,
-           det_persite,
-           occu_models,
-           occu_pVar,
-           occu_persite)
-    fargs <- as.list(match.call(expand.dots = TRUE))
-    objnames <- as.character(fargs)[-c(1, 2)]
-    nobjects <- length(objects)
-    for (i in 1:nobjects) {
-      if (i == 1)
-        write.xlsx(objects[[i]], file, sheetName = objnames[i])
-      else
-        write.xlsx(objects[[i]], file, sheetName = objnames[i],
-                   append = TRUE)
-    }
-  }
-
-
-# Lendos os dados das outras espécies e adicionando às sheets
-# Para reconhecer o nome parcial dos arquivos
-det_models <- apropos("detection-models")
-n_det_models <- length(det_models)
-for (i in 1:n_det_models) {
-  if (i == 1)
-    write.x
-  lsx(det_models[[i]], file = "./results/occupancy-model-OCCASION", sheetName = objnames[i])
-  else
-    addDataFrame(det_model[[1]],
-                 det_models,
-                 startRow  =
-                   startColumn = 1)
-}
-
-
-#### Juntando os dados de acordo com  tipo de dado -----
-# Criando o workbook do output1
-det_m_wb <- createWorkbook()
-sheet  <- createSheet(wb, sheetName = "det_models")
-
-# Para reconhecer o nome parcial dos arquivos
-det_models <- apropos("detection-models")
-n_det_models <- length(det_models)
-
-# Adicionando os outputs
-for (i in 1:n_det_models) {
-  if (i == 1)
-    det_models_all <- data.frame(det_models[[i]])
-  else
-    addDataFrame(det_model[[1]],
-                 sheet,
-                 startRow  = 1
-                 startColumn = 1)
-}
-
-
-det_m <- createWorkbook()
-sheet  <- createSheet(wb, sheetName = "det_models")
-data <- data.frame(det_models[[i]])
-addDataFrame(data, sheet, startRow = 3)
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-datalist = list()
-
-for (i in 1:(n_det_models)) {
-  dat <- det_models
-  datalist[[i]] <- dat # add it to your list
-}
-
-big_data <- dplyr::bind_rows(datalist)
-# or big_data <- data.table::rbindlist(datalist)
-
-
-
-
-
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-library("tidyr")
 library("readxl")
 library(openxlsx)
+library(data.table)
 
-# Seguindo as dicas do curso ----
-##Lendo todos os arquivos em .csv (poderiam ser outros padrões) de um diretório
+
 ## files.path é um vetor de diretórios, não leu os arquivos ainda, tem apenas os diretórios
 
 det_models_path <-
@@ -145,57 +21,64 @@ det_models_path <-
              pattern = "detection-models-10x1",
              full.names = TRUE)
 det_models_data <- lapply(det_models_path, read.csv)
+det_models <- rbindlist(det_models_data, fill = TRUE)
 
 det_cov_path <-
   list.files(path = "./output",
              pattern = "detection-covariates-10x1",
              full.names = TRUE)
 det_cov_data <- lapply(det_cov_path, read.csv)
-
+det_cov <- rbindlist(det_cov_data)
 
 det_pVar_path <-
   list.files(path = "./output",
              pattern = "detection-pVar-10x1",
              full.names = TRUE)
 det_pVar_data <- lapply(det_pVar_path, read.csv)
-
+det_pVar <- rbindlist(det_pVar_data, fill = TRUE)
 
 det_persite_path <-
   list.files(path = "./output",
              pattern = "detection-persite-10x1",
              full.names = TRUE)
 det_persite_data <- lapply(det_persite_path, read.csv)
+det_persite <- rbindlist(det_persite_data, fill = TRUE)
 
 det_final_path <-
   list.files(path = "./output",
              pattern = "detection-final-10x1",
              full.names = TRUE)
 det_final_data <- lapply(det_final_path, read.csv)
+det_final <- rbindlist(det_final_data)
 
 occu_cov_path <-
   list.files(path = "./output",
              pattern = "occupancy-covariates-10x1",
              full.names = TRUE)
 occu_cov_data <- lapply(occu_cov_path, read.csv)
+occu_cov <- rbindlist(occu_cov_data)
 
 occu_psiVar_path <-
   list.files(path = "./output",
              pattern = "occupancy-psiVar-10x1",
              full.names = TRUE)
 occu_psiVar_data <- lapply(occu_psiVar_path, read.csv)
+occu_psiVar <- rbindlist(occu_psiVar_data, fill =  TRUE)
 
 occu_persite_path <-
   list.files(path = "./output",
              pattern = "occupancy-persite-10x1",
              full.names = TRUE)
 occu_persite_data <- lapply(occu_persite_path, read.csv)
+occu_persite <- rbindlist(occu_persite_data, fill = TRUE)
 
-occu_final_pat <-
+occu_final_path <-
   list.files(path = "./output",
              pattern = "occupancy-final-10x1",
              full.names = TRUE)
-occu_final_path <- t(occu_final_pat)
-occu_final_dat <- lapply(occu_final_path, read.csv)
+occu_final_data <- lapply(occu_final_path, read.csv)
+occu_final <- rbindlist(occu_final_data)
+
 
 
 wb <- createWorkbook("./results/result-10x1.xlsx")
@@ -208,15 +91,15 @@ addWorksheet(wb, "occu_cov")
 addWorksheet(wb, "occu_psiVar")
 addWorksheet(wb, "occu_final")
 addWorksheet(wb, "occu_persite")
-writeData(wb, "det_models", det_models_data)
-writeData(wb, "det_cov", det_cov_data)
-writeData(wb, "det_pVar", det_pVar_data)
-writeData(wb, "det_final", det_final_data)
-writeData(wb, "det_persite", det_persite_data)
-writeData(wb, "occu_cov", occu_cov_data)
-writeData(wb, "occu_psiVar", occu_psiVar_data)
-writeData(wb, "occu_final", occu_final_data)
-writeData(wb, "occu_persite", occu_persite_data)
+writeData(wb, "det_models", det_models)
+writeData(wb, "det_cov", det_cov)
+writeData(wb, "det_pVar", det_pVar)
+writeData(wb, "det_final", det_final)
+writeData(wb, "det_persite", det_persite)
+writeData(wb, "occu_cov", occu_cov)
+writeData(wb, "occu_psiVar", occu_psiVar)
+writeData(wb, "occu_final", occu_final)
+writeData(wb, "occu_persite", occu_persite)
 saveWorkbook(wb, "./results/result-10x1.xlsx")
 
 openXL("./results/result-10x1.xlsx")
