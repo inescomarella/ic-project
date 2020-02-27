@@ -3,6 +3,7 @@
 ##### The analysis are made individually to each species. The script has two parts, the first part is to develop the model detections and to analyse the influence of covariates in the species detection per site, the second part is to develop the occupancy models itself based on the detection model selected in the previous step.
 
 
+# 0. Loading packages -----
 library(readxl)
 library(vegan)
 library(unmarked)
@@ -28,7 +29,7 @@ Var <-
 
 # 2.1. Importing species data -----
 cfm <- read_excel("./data/occu-10x1.xlsx",
-                  sheet = "sp2")
+                  sheet = "sp1")
 cfm <- cfm[, -1]
 View(cfm)
 
@@ -47,9 +48,9 @@ summary(cfm.umf)
 # 3.1. Evaluate the detection bias -----
 # if it is null (dec1), if it is influenced by time (dec2), or by the co-variates (dec3)
 
-dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf)
-dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf)
-dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
+dec1.cfm <- occu(~ 1 ~ 1, cfm.umf)
+dec2.cfm <- occu(~ obsNum ~ 1, cfm.umf)
+dec3.cfm <- occu(~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
 
 # Creating a list of models
 dec.list.cfm <-
@@ -61,20 +62,30 @@ dec.list.cfm <-
 ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordered by AIC
 
-
-# 3.2. Intermediate step -----
-# If the detection model selected is influenced by the covariates "psi(.)p(var)", then it is necessary to disintegrate the function dec3 according to Akaike criterion
-dd.cfm <- dredge(dec3.cfm)
-# Exporting covariate detection model  ----
-View(dd.cfm)   # Ordered by AIC
+# 3.1.1. Exporting list of detection models ----
+# Fill the dataframe ocording to the previous table
+det_list_df <- data.frame(nPars = c(5, 2, 7),
+                 AIC = c(85.26, 92.54, 100.95),
+                 delta = c(0.00, 7.28, 15.69),
+                 AICwt = c(0.97406, 0.02556, 0.00038),
+                 cumltvWt = c(0.97, 1.00, 1.00),
+                 Species = c("sp2", NA, NA),
+                 row.names = c("psi(.)p(var)", "psi(.)p(.)", "psi(.)p(t)"))
+det_list_df
 write.table(
-  dd.cfm,
-  file = "./output/detection-pVar-10x1-sp2.csv",
-  ## CHANGE THE SPECIES
+  det_list_df,
+  file = "./output/detection-models-10x1-sp2.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
 )
+
+
+
+# 3.2. Intermediate step -----
+# If the detection model selected is influenced by the covariates "psi(.)p(var)", then it is necessary to disintegrate the function dec3 according to Akaike criterion
+dd.cfm <- dredge(dec3.cfm)
+View(dd.cfm)   # Ordered by AIC
 
 table <- as.matrix(dd.cfm)
 importancia.var.cfm <- matrix(NA, nrow = 5, ncol = 6)
@@ -93,25 +104,188 @@ for (i in 1:5) {
   temp <- na.omit(table[, c(i, 9, 10)])
   sd.t <- apply(temp, 2, sd)
   mean.t <- apply(temp, 2, mean)
-  importancia.var.cfm[i, ] <-
+  importancia.var.cfm[i,] <-
     c(mean.t, sd.t)
 }
 View(importancia.var.cfm)
 
-# Exporting covariates bias on detection ----
+
+
+
+
+
+#Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ 1
+
+# 3.3. Final detection model function -----
+# write here the final function ( ~ detection ~ occupancy), consider the occupancy null
+dec.sel.cfm <-
+  occu(~ ele + RAI_Hum ~ 1, cfm.umf)
+det.cfm.pred <-
+  predict(dec.sel.cfm, type = "det", appendData = TRUE)
+colMeans(det.cfm.pred[, 1:4])
+
+
+# 3.3.1. Exporting final model detection ----
+det_final <- t(colMeans(det.cfm.pred[, 1:4]))
+
+# Specifying the model in the table
+rownames(det_final) <- "p(ele + RAI_Hum)"
+
+# Specifying the species in the table
+det_final_sp <- cbind(det_final, c("sp2"))
+View(det_final_sp)
+
 write.table(
-  importancia.var.cfm,
-  file = "./output/detection-covariates-10x1-sp2.csv",
-  ## CHANGE THE SPECIES
+  det_final_sp,
+  file =
+    "./output/detection-final-10x1-sp2-p(ele-RAI_Hum).csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
+# 3.3.2. Exporting detection bias per site ----
+# Specifiying the species and the model in the table
+sp_model <- matrix(NA, nrow = 1, ncol = 2)
+colnames(sp_model) <- c("sp2", "p(ele + RAI_Hum)")
+det_persite_sp <- cbind(det.cfm.pred, sp_model)
+View(det_persite_sp)
+
+write.table(
+  det_persite_sp,
+  file =
+    "./output/detection-persite-10x1-sp2-p(ele-RAI_Hum).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
 )
 
-# Exporting graph 1 ----
+
+
+
+
+
+# 4. OCCUPANCY MODELING =====
+
+# 4.1. Evaluate the occupancy ####
+# Use the detection model function selected in the previous step ( ~ detection ~ occupancy)
+
+ocu.cfm <-
+  occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
+dd.ocu.cfm <- dredge(ocu.cfm)
+View(dd.ocu.cfm) # Ordered by AIC
+
+
+# 4.2. Intermediate step -----
+# If more than one model is an explanatory function (according to AIC), then evaluate the models based on the mean and standard deviation
+
+table.ocu <- as.matrix(dd.ocu.cfm)
+OCU.importancia.var.cfm <-
+  matrix(NA, nrow = ncol(table.ocu) - 5, ncol =
+           6)
+rownames(OCU.importancia.var.cfm) <-
+  colnames(table.ocu)[1:(ncol(table.ocu) - 5)]
+
+colnames(OCU.importancia.var.cfm) <-
+  c("coef.mean",
+    "coef.sd",
+    "delta.mean",
+    "delta.sd",
+    "w.mean",
+    "w.sd")
+
+for (i in 1:(ncol(table.ocu) - 5)) {
+  temp <- na.omit(table.ocu[, c(i, 9, 10)])
+  sd.t <- apply(temp, 2, sd)
+  mean.t <- apply(temp, 2, mean)
+  OCU.importancia.var.cfm[i,] <-
+    c(mean.t, sd.t)
+}
+View(OCU.importancia.var.cfm)
+
+
+
+
+# Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
+
+# 4.3. Final occupancy model function -----
+# Write here the final function ( ~ detection ~ occupancy), based on previous  step
+ocu.sel.cfm <-
+  occu(~ 1 ~ RS1 + RS2, cfm.umf)
+ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
+colMeans(ocu.pred.cfm)
+View(ocu.pred.cfm)
+
+
+# 4.3.1. Exporting final occupancy model ----
+
+occu_final <- t(colMeans(ocu.pred.cfm))
+
+# Specifying the model in the table
+rownames(occu_final) <- "p(.)psi(RS1 + RS2)"
+
+# Specifying the species in the table
+occu_final_sp <- cbind(occu_final, c("sp2"))
+View(occu_final_sp)
+
+write.table(
+  occu_final_sp,
+  file =
+    "./output/occupancy-final-10x1-sp2-p(.)psi(RS1-RS2).csv",
+  ## CHANGE SPECIES AND P( )
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
+# 4.3.2. Exporting occupancy per site ----
+# Specifiying the species and the model in the table
+sp_model_occu <- matrix(NA, nrow = 1, ncol = 2)
+colnames(sp_model_occu) <- c("sp2", "p(.)psi(RS1 + RS2)")
+occu_persite_sp <- cbind(ocu.pred.cfm, sp_model_occu)
+View(occu_persite_sp)
+
+write.table(
+  occu_persite_sp,
+  file =
+    "./output/occupancy-persite-10x1-sp2-p(.)psi(RS1-RS2).csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
+
+
+
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 5. Exporting data ----
+# CHANGE SPECIES AND P( )PSI( )
+
+# 5.1. Exporting covariate detection model  ----
+View(dd.cfm)   # Ordered by AIC
+dd.cfm_sp <- cbind(dd.cfm, "sp1")
+View(dd.cfm_sp)
+write.table(
+  dd.cfm_sp,
+  file = "./output/detection-pVar-10x1-sp1.csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
+
+# 5.2. Exporting covariates bias on detection ----
+View(importancia.var.cfm)
+importancia.var.cfm_sp <- cbind(importancia.var.cfm, "sp1")
+write.table(
+  importancia.var.cfm_sp,
+  file = "./output/detection-covariates-10x1-sp1.csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
+
+# 5.3. Exporting graph 1 ----
 png(
   "figs/detection-covariates-10x1-sp2.png",
-  ## CHANGE THE SPECIES
   res = 300,
   width = 2400,
   height = 2200
@@ -141,8 +315,7 @@ op <-
        labels = FALSE)
   axis(side = 2,
        labels = TRUE,
-       cex.axis = 0.7,
-  )
+       cex.axis = 0.7,)
   text(
     x = seq(1, 5, by = 1),
     par("usr")[3] - 0.25,
@@ -214,114 +387,31 @@ binomnames.det <-
 title(binomnames.det, line = 1, outer = TRUE)
 dev.off()
 
-
-#Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ 1
-
-# 3.3. Final detection model function -----
-# write here the final function ( ~ detection ~ occupancy), consider the occupancy null
-dec.sel.cfm <-
-  occu( ~ ele ~ 1, cfm.umf)
-det.cfm.pred <-
-  predict(dec.sel.cfm, type = "det", appendData = TRUE)
-colMeans(det.cfm.pred[, 1:4])
-
-#### Especificando na tabela a espécie e o modelo ####
-sp_model <- matrix(NA, nrow = 1, ncol = 2)
-colnames(sp_model) <- c("sp2", "p(ele)")
-sp_model
-
-# Specifying the species in the table
-det_final <- t(colMeans(det.cfm.pred[, 1:4]))
-View(det_final)
-rownames(det_final) <- "p(ele)"
-det_final_sp <- cbind(det_final, c("sp2"))
-View(det_final_sp)
-
-# Exporting final model detection ----
+# 5.4. Exporting occupancy models ----
+View(dd.ocu.cfm)
+dd.ocu.cfm_sp <- cbind(dd.ocu.cfm, "sp2")
 write.table(
-  ## CHANGE SPECIES AND P( )
-  det_final_sp,
-  file =
-    "./output/detection-final-10x1-sp2-p(ele).csv",
-  sep = ",",
-  row.names = TRUE,
-  col.names = NA
-)
-
-# Specifiying the species in the table
-det_persite_sp <- cbind(det.cfm.pred, sp_model)
-View(det_persite_sp)
-
-# Exporting detection bias per site ----
-write.table(
-  ## CHANGE SPECIES AND P( )
-  det_final_sp,
-  file =
-    "./output/detection-persite-10x1-sp2-p(ele).csv",
+  dd.ocu.cfm_sp,
+  file = "./output/occupancy-psiVar-10x1-sp2.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
 )
 
 
-# 4. OCCUPANCY MODELING =====
 
-# 4.1. Evaluate the occupancy ####
-# Use the detection model function selected in the previous step ( ~ detection ~ occupancy)
-
-ocu.cfm <-
-  occu(~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
-dd.ocu.cfm <- dredge(ocu.cfm)
-View(dd.ocu.cfm) # Ordered by AIC
-
-# Exporting occupancy models ----
+# 5.5. Exporting covariate influence in occupancy ----
+OCU.importancia.var.cfm_sp <- cbind(OCU.importancia.var.cfm, "sp2")
 write.table(
-  dd.ocu.cfm,
-  file = "./output/occupancy-psiVar-10x1-sp1.csv",
+  OCU.importancia.var.cfm_sp,
+  file = "./output/occupancy-covariates-10x1-sp2.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
 )
-
-
-# 4.2. Intermediate step -----
-# If more than one model is an explanatory function (according to AIC), then evaluate the models based on the mean and standard deviation
-
-table.ocu <- as.matrix(dd.ocu.cfm)
-OCU.importancia.var.cfm <-
-  matrix(NA, nrow = ncol(table.ocu) - 5, ncol =
-           6)
-rownames(OCU.importancia.var.cfm) <-
-  colnames(table.ocu)[1:(ncol(table.ocu) - 5)]
-
-colnames(OCU.importancia.var.cfm) <-
-  c("coef.mean",
-    "coef.sd",
-    "delta.mean",
-    "delta.sd",
-    "w.mean",
-    "w.sd")
-
-for (i in 1:(ncol(table.ocu) - 5)) {
-  temp <- na.omit(table.ocu[, c(i, 9, 10)])
-  sd.t <- apply(temp, 2, sd)
-  mean.t <- apply(temp, 2, mean)
-  OCU.importancia.var.cfm[i, ] <-
-    c(mean.t, sd.t)
-}
-View(OCU.importancia.var.cfm)
-
-# Exporting covariate influence in detection ----
-write.table(
-  OCU.importancia.var.cfm,
-  file = "./output/occupancy-covariates-10x1-sp1.ccsv",
-  sep = ",",
-  row.names = TRUE,
-  col.names = NA
-)
-# Exporting graph 2 ----
+# 5.6. Exporting graph 2 ----
 png(
-  "figs/occupancy-covariates-10x1-sp1.png",
+  "figs/occupancy-covariates-10x1-sp2.png",
   res = 300,
   width = 2400,
   height = 2200
@@ -417,26 +507,7 @@ op <-
 
 binomnames.ocu <-
   expression(bold(paste(
-    "Variáveis de ocupação - ", italic("Canis lupus familiaris"), ""
+    "Variáveis de ocupação - ", italic("Cerdocyon thous"), ""
   )))
 title(binomnames.ocu, line = 1, outer = TRUE)
 dev.off()
-
-
-# Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
-
-# 4.3. Final occupancy model function -----
-# Write here the final function ( ~ detection ~ occupancy), based on previous  step
-ocu.sel.cfm <-
-  occu( ~ DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
-ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
-colMeans(ocu.pred.cfm)
-View(ocu.pred.cfm)
-# Exporting occupancy per site ----
-write.table(
-  ocu.pred.cfm,
-  file = "./output/occupancy-persite-10x1-sp1-p(DistBorda_PLAN+RAI_Hum)psi(.).csv",
-  sep = ",",
-  row.names = TRUE,
-  col.names = NA
-)
