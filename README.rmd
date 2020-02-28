@@ -3,13 +3,6 @@ title: "Occupancy modeling"
 author: "Inês Motta Comarella"
 output: html_document
 ---
-```{r, library, eval=FALSE, echo=FALSE}
-library(readxl)
-library(vegan)
-library(unmarked)
-library(MuMIn)
-library(plotrix)
-```
 
 
 This work is useful to model occupancy considering the detection per site.
