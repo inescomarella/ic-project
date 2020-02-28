@@ -1,36 +1,126 @@
-# Analysis of habitat selection and competitive relationships
+---
+title: "Occupancy modeling"
+author: "Inês Motta Comarella"
+output: html_document
+---
+```{r, library, eval=FALSE, echo=FALSE}
+library(readxl)
+library(vegan)
+library(unmarked)
+library(MuMIn)
+library(plotrix)
+```
+
 
 This work is useful to model occupancy considering the detection per site.
 
-## 1. Motivation
+
+## Motivation
+***
 This project is part of my Scientific Initiation project, entitled "Habitat selection and competitive relationships among carnivores in a fragmented landscape". The work was funded by FAPES/Vale 2015.
 
 
-## 2. Analysis steps
-There are 3 steps, the first prepare the data, the second analyse the data, and the third prepare the output so you can analyse the results. I don't have an script to the first step because I've made it manually, but I'll decribe next. 
+## The workflow
+***
+At least this first phase of the project is very simple and it workflow is as follows.
+There are 3 steps:
+
+1. Prepare the data
+    + input: .xlsx
+    + output: .xlsx
+2. Model analysis
+    + input: .xlsx
+    + output: .csv
+3. Organize the outputs so you can analyse the results
+    + input: .csv
+    + output: .xlsx
+
+I don't have an script to the first step because I've made it manually, but I'll decribe it next. 
 
 
-### 3. Preparing the data
+## Preparing the data
+***
+
+#### Species data
+
 We used occurence based on presence-absence, so it's not possible to estimate abundance. Each especies has it's own occurence table formated as a sites x occasion table, so the site are in the columns and the occasion in the rows. an occasion is the period of time you are considering to register the species occurence, it can be a day, 3 days, 5 days, etc. I've tests some occasion based on works published, so I could choose what is best.
 
 I included an extra-step in this case to remove the species name so I could share my results. Because it's an extra I names the script 0-prep-data.R, bt it's not crucial to run the data.
 
-### 4. Model analysis
+#### Enviromental data
+ESTUDA 
+
+## Model analysis
+***
 The modeling is divided in 4 main steps, 1. input variables and species data, 2. analyse the detection bias, 3. model the occupancy prediction and 4. export the outputs. This script is a kind of hard to run because many steps are important to decide what to do in the next so it's necessary to pay atention, specially to rename the outputs.
 
 Let's see how it works:
 
-####
+### Importing data
+The inputs are XLSX file extension, so we'll use `read_excel()` from "readxl" package
+
+* Variables
+
+The variables are the same to all species, as they characterize the enviroment. 
+
+* Species
+
+The species data are together in a XLSX file, and the species occurence table are in separated sheets. 
 
 
+```{r Read species data, eval=FALSE}
+cfm <- read_excel("./data/occu-10x1.xlsx",
+                  sheet = "sp1") ## read species 1 occurence table
+```
+
+It is necessary to transform the matrix to be read my the "unmarked" package, `unmarkedFrameOccu()`.
+
+### Detection bias model
+
+##### Detection bias hipothesis
+Species detection can be biased by the site conditions (p(var)), or by the sampling time (p(t)) or maybe it can be just random and not be determined by a any characteristic (p(.)). So the first step to model the detection bias is to test those hipothesis.
+
+```{r Detection bias hipothesis, eval=FALSE}
+# Detection bias hipothesis
+dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf) # null hipothesis
+dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf) # sampling time bias
+dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf) # covariates bias
+```
+
+The `occu( ~ detection ~ occupancy)` function is a two-sided function and consider the detection in the occupancy modeling.  
+**Atention**
+The model selection is based on **Akaike Information Criterion (AIC)**, so it's important to look at the result to decide the next step.  
+**Output**
+Write a table with the results, they will be usefull in your future analysis. Because the output is a S4 class method it is not possible to simply write it automatically.
+
+#### Intermadiate step
+In case the model selected is a function of covariates, then an extra-step is necessary. This is necessary to evaluate the fixed effect terms in the global model.
+
+```{r det-dredge(), eval=FALSE}
+dd.cfm <- dredge(dec3.cfm)
+```
 
 
-## Modifications on the script
+#### Final detection model function
+
+
+### Naming codes
+This is 
+
+
+> Modifications on the script
+
 Detecção1 = detection-models -> first step in detection models to check if it is null, or determined by time or by the covariates
+
 Detecção2 = detection-pVar -> intermediate step, in case detection is determined by covariates, models different combination of covariates.
+
 p_var = detection-covariates -> covariates bias on detection
+
 DeteccaoUA = detection-persite -> detection bias per site
+
 Ocupacao1 = occupancy-models -> first step in occupancy models to check the explanatory covariates
+
 Ocupacao2 = occupancy-covariates -> covariates mean on occupancy
+
 OcupacaoUA = occupancy-persite -> occupancy prediction per site
 
