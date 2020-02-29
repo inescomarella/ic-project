@@ -10,78 +10,78 @@
 
 
 library("readxl")
-library(openxlsx)
-library(data.table)
+library("openxlsx")
+library("data.table")
 
 
 ## files.path é um vetor de diretórios, não leu os arquivos ainda, tem apenas os diretórios
 
 det_models_path <-
   list.files(path = "./output",
-             pattern = "detection-models-10x1",
+             pattern = "detection-models-1x1",
              full.names = TRUE)
 det_models_data <- lapply(det_models_path, read.csv)
 det_models <- rbindlist(det_models_data, fill = TRUE)
 
 det_cov_path <-
   list.files(path = "./output",
-             pattern = "detection-covariates-10x1",
+             pattern = "detection-covariates-1x1",
              full.names = TRUE)
 det_cov_data <- lapply(det_cov_path, read.csv)
 det_cov <- rbindlist(det_cov_data)
 
 det_pVar_path <-
   list.files(path = "./output",
-             pattern = "detection-pVar-10x1",
+             pattern = "detection-pVar-1x1",
              full.names = TRUE)
 det_pVar_data <- lapply(det_pVar_path, read.csv)
 det_pVar <- rbindlist(det_pVar_data, fill = TRUE)
 
 det_persite_path <-
   list.files(path = "./output",
-             pattern = "detection-persite-10x1",
+             pattern = "detection-persite-1x1",
              full.names = TRUE)
 det_persite_data <- lapply(det_persite_path, read.csv)
 det_persite <- rbindlist(det_persite_data, fill = TRUE)
 
 det_final_path <-
   list.files(path = "./output",
-             pattern = "detection-final-10x1",
+             pattern = "detection-final-1x1",
              full.names = TRUE)
 det_final_data <- lapply(det_final_path, read.csv)
 det_final <- rbindlist(det_final_data)
 
 occu_cov_path <-
   list.files(path = "./output",
-             pattern = "occupancy-covariates-10x1",
+             pattern = "occupancy-covariates-1x1",
              full.names = TRUE)
 occu_cov_data <- lapply(occu_cov_path, read.csv)
 occu_cov <- rbindlist(occu_cov_data)
 
 occu_psiVar_path <-
   list.files(path = "./output",
-             pattern = "occupancy-psiVar-10x1",
+             pattern = "occupancy-psiVar-1x1",
              full.names = TRUE)
 occu_psiVar_data <- lapply(occu_psiVar_path, read.csv)
 occu_psiVar <- rbindlist(occu_psiVar_data, fill =  TRUE)
 
 occu_persite_path <-
   list.files(path = "./output",
-             pattern = "occupancy-persite-10x1",
+             pattern = "occupancy-persite-1x1",
              full.names = TRUE)
 occu_persite_data <- lapply(occu_persite_path, read.csv)
 occu_persite <- rbindlist(occu_persite_data, fill = TRUE)
 
 occu_final_path <-
   list.files(path = "./output",
-             pattern = "occupancy-final-10x1",
+             pattern = "occupancy-final-1x1",
              full.names = TRUE)
 occu_final_data <- lapply(occu_final_path, read.csv)
 occu_final <- rbindlist(occu_final_data)
 
 
 
-wb <- createWorkbook("./results/result-10x1.xlsx")
+wb <- createWorkbook("./results/result-1x1.xlsx")
 addWorksheet(wb, "det_models")
 addWorksheet(wb, "det_cov")
 addWorksheet(wb, "det_pVar")
@@ -100,6 +100,7 @@ writeData(wb, "occu_cov", occu_cov)
 writeData(wb, "occu_psiVar", occu_psiVar)
 writeData(wb, "occu_final", occu_final)
 writeData(wb, "occu_persite", occu_persite)
-saveWorkbook(wb, "./results/result-10x1.xlsx")
+saveWorkbook(wb, "./results/result-1x1.xlsx")
 
-openXL("./results/result-10x1.xlsx")
+openXL("./results/result-1x1.xlsx")
+
