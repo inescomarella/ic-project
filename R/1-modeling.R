@@ -2,7 +2,7 @@
 
 ##### This is script aims to model occupancy based heterogeneous sites, it was developed originally to run camera-tra data of carnivores in a fragmented landscape
 ##### The analysis are made individually to each species. The script has two parts, the first part is to develop the model detections and to analyse the influence of covariates in the species detection per site, the second part is to develop the occupancy models itself based on the detection model selected in the previous step.
-  
+
 
 # 0. Loading packages  -----
 library(readxl)
@@ -12,7 +12,7 @@ library(MuMIn)
 library(plotrix)
 
 
-# 1. Importing explanatory variables and covariates =====
+# 1. Importing explanatory variables =====
 # This first step is equal to all species
 
 VariaveisExp <-
@@ -31,8 +31,8 @@ Var <-
 # For now on the analyses is DIFFERENT to each species
 
 # 2.1. Importing species data -----
-cfm <- read_excel("./data/occu-1x1.xlsx",
-                  sheet = "sp10")
+cfm <- read_excel("./data/occu-10x1.xlsx",
+                  sheet = "sp3")
 cfm <- cfm[, -1]
 View(cfm)
 
@@ -43,7 +43,7 @@ summary(cfm.umf)
 
 # 3. DETECTION MODELING =====
 
-# 3.1. Evaluate the detection bias -----
+# 3.1. Evaluate the detection models -----
 # if it is null (dec1), if it is influenced by time (dec2), or by the co-variates (dec3)
 
 # Detection bias hipothesis
@@ -61,22 +61,23 @@ dec.list.cfm <-
 ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordered by AIC
 
+
 # 3.1.1. Exporting list of detection models ----
 # As the modSel output is S4 class method it is not possible to coerse it to dataframe and export
-# Fill the dataframe according to the modSel 
+# Fill the dataframe according to the modSel
 det_list_df <- data.frame(
-  nPars = c(5, 2, 66),
-  AIC = c(50.46, 50.51, 160.59),
-  delta = c(0.00, 0.049, 110.131),
-  AICwt = c(5.1e-01, 4.9e-01, 6.2e-25),
-  cumltvWt = c(0.51, 1.00, 1.00),
-  Species = "sp9",
-  row.names = c("psi(.)p(var)", "psi(.)p(.)", "psi(.)p(t)")
+  nPars = c(2, 7, 5),
+  AIC = c(126.65, 128.49, 133.92),
+  delta = c(0.00, 1.84, 7.27),
+  AICwt = c(0.701, 0.280, 0.019),
+  cumltvWt = c(0.70, 0.98, 1.00),
+  Species = "sp3",
+  row.names = c("psi(.)p(.)", "psi(.)p(var)", "psi(.)p(t)")
 )
 det_list_df
 write.table(
   det_list_df,
-  file = "./output/detection-models-1x1-sp9.csv",
+  file = "./output/detection-models-10x1-sp4.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -122,10 +123,10 @@ colMeans(det.cfm.pred[, 1:4])
 # Specifying species and model in the table
 sp_det_model <- matrix(NA, nrow = 1, ncol = 2)
 colnames(sp_det_model) <- c("Species", "Model")
-sp_det_model[,1] <- "sp9"
+sp_det_model[,1] <- "sp10"
 sp_det_model[,2] <- "p(.)"
 
-# 3.3.1. Exporting final model detection ----
+# 3.3.1. Exporting final detection model ----
 det_final <- t(colMeans(det.cfm.pred[, 1:4]))
 det_final_sp <- cbind(det_final, sp_det_model)
 det_final_sp
@@ -133,7 +134,7 @@ det_final_sp
 write.table(
   det_final_sp,
   file =
-    "./output/detection-final-1x1-sp9-p(.).csv",
+    "./output/detection-final-10x1-sp10-p(.).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -145,14 +146,14 @@ det_persite_sp <- cbind(det.cfm.pred, sp_det_model)
 write.table(
   det_persite_sp,
   file =
-    "./output/detection-persite-1x1-sp9-p(.).csv",
+    "./output/detection-persite-10x1-sp10-p(.).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
 )
 # 4. OCCUPANCY MODELING =====
 
-# 4.1. Evaluate the occupancy ####
+# 4.1. Evaluate the occupancy models ####
 # Use the detection model function selected in the previous step ( ~ detection ~ occupancy)
 # Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
 
@@ -163,7 +164,7 @@ View(dd.ocu.cfm) # Ordered by AIC
 
 
 # 4.2. Intermediate step -----
-# If more than one model is an explanatory function (according to AIC), then evaluate the models based on the mean and standard deviation
+# If more than one model is an explanatory function (according to AIC), then evaluate the covariates based on the mean and standard deviation
 
 table.ocu <- as.matrix(dd.ocu.cfm)
 OCU.importancia.var.cfm <-
@@ -202,7 +203,7 @@ colMeans(ocu.pred.cfm)
 # Specifying species and model in the table
 sp_occu_model <- matrix(NA, nrow = 1, ncol = 2)
 colnames(sp_occu_model) <- c("Species", "Model")
-sp_occu_model[,1] <- "sp9"
+sp_occu_model[,1] <- "sp1"
 sp_occu_model[,2] <- "p(.)psi(RS1 + RS3 + RAI_Hum)"
 
 # 4.3.1. Exporting final occupancy model ----
@@ -214,7 +215,7 @@ occu_final_sp <- cbind(occu_final, sp_occu_model)
 write.table(
   occu_final_sp,
   file =
-    "./output/occupancy-final-1x1-sp9-p(.)psi(RS1-RS3-RAI_Hum).csv",
+    "./output/occupancy-final-10x1-sp1-p(.)psi(RS1-RS3-RAI_Hum).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -227,7 +228,7 @@ occu_persite_sp <- cbind(ocu.pred.cfm, sp_occu_model)
 write.table(
   occu_persite_sp,
   file =
-    "./output/occupancy-persite-1x1-sp9-p(.)psi(RS1-RS3-RAI_Hum).csv",
+    "./output/occupancy-persite-10x1-sp1-p(.)psi(RS1-RS3-RAI_Hum).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -235,28 +236,28 @@ write.table(
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 5. Exporting data ----
 
-Species <- "sp9"
+Species <- "sp10"
 
 # Metadata with species names
 sp_name <- read_excel("./data/species-names.xlsx")
 sp_name
 
 
-# 5.1. Exporting covariate detection model  ----
+# 5.1. Exporting detection models p(var) ----
 dd.cfm_sp <- cbind(dd.cfm, Species)
 write.table(
   dd.cfm_sp,
-  file = "./output/detection-pVar-1x1-sp9.csv",
+  file = "./output/detection-pVar-10x1-sp10.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
 )
 
-# 5.2. Exporting covariates bias on detection ----
+# 5.2. Exporting detection covariates mean ----
 importancia.var.cfm_sp <- cbind(importancia.var.cfm, Species)
 write.table(
   importancia.var.cfm_sp,
-  file = "./output/detection-covariates-1x1-sp9.csv",
+  file = "./output/detection-covariates-10x1-sp10.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -266,7 +267,7 @@ write.table(
 dd.ocu.cfm_sp <- cbind(dd.ocu.cfm, Species)
 write.table(
   dd.ocu.cfm_sp,
-  file = "./output/occupancy-psiVar-1x1-sp9.csv",
+  file = "./output/occupancy-psiVar-10x1-sp3.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -276,7 +277,7 @@ OCU.importancia.var.cfm_sp <-
   cbind(OCU.importancia.var.cfm, Species)
 write.table(
   OCU.importancia.var.cfm_sp,
-  file = "./output/occupancy-covariates-1x1-sp9.csv",
+  file = "./output/occupancy-covariates-10x1-sp6.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -284,7 +285,7 @@ write.table(
 
 # 5.5. Exporting graph 1 ----
 png(
-  "figs/detection-covariates-1x1-sp9.png",
+  "figs/detection-covariates-10x1-sp10.png",
   res = 300,
   width = 2400,
   height = 2200
@@ -382,7 +383,7 @@ op <-
 
 binomnames.det <-
   expression(bold(paste(
-    "Variáveis de detecção - ", italic("Procyon cancrivorus"), ""
+    "Variáveis de detecção - ", italic("Lontra longicaudis"), ""
   )))
 title(binomnames.det, line = 1, outer = TRUE)
 dev.off()
@@ -391,7 +392,7 @@ dev.off()
 
 # 5.6. Exporting graph 2 ----
 png(
-  "figs/occupancy-covariates-1x1-sp9.png",
+  "figs/occupancy-covariates-10x1-sp1.png",
   res = 300,
   width = 2400,
   height = 2200
@@ -487,7 +488,7 @@ op <-
 
 binomnames.ocu <-
   expression(bold(paste(
-    "Variáveis de ocupação - ", italic("Procyon cancrivorus"), ""
+    "Variáveis de ocupação - ", italic("Canis lupus familiaris"), ""
   )))
 title(binomnames.ocu, line = 1, outer = TRUE)
 dev.off()
