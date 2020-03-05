@@ -32,7 +32,7 @@ Var <-
 # For now on the analyses is DIFFERENT to each species
 
 # 2.1. Importing species data -----
-cfm <- read_excel("./data/occu-10x1.xlsx",
+cfm <- read_excel("./data/occu-7x1.xlsx",
                   sheet = "sp3")
 cfm <- cfm[, -1]
 View(cfm)
@@ -159,7 +159,7 @@ write.table(
 # Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
 
 ocu.cfm <-
-  occu(~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
+  occu(~ 1 ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
 dd.ocu.cfm <- dredge(ocu.cfm)
 View(dd.ocu.cfm) # Ordered by AIC
 
