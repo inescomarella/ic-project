@@ -1,19 +1,48 @@
 ---
-title: "Occupancy modeling"
+title: "Modelagem de ocupação single-season "
 author: "Inês Motta Comarella"
 output: html_document
 ---
 
 
-Single-season single-species occupancy model to unmarked species. It follows the stepwise variable selection method. The analysis has two steps, the first one is to model the detection, the second one is to model the occupancy based on the detection model selected in the previous step.
-
-## Motivation
-***
-This project is part of my Scientific Initiation project, entitled "Habitat selection and competitive relationships among carnivores in a fragmented landscape".
+Modelo de ocupação single-season single-species para espécies não marcadas de acordo com o proposto por MacKenzie et al. (2002). Segue o método **stepwise** de seleção de variáveis.
 
 
-## Preparing the data
+## Motivação
 
+Esse script é parte do meu projeto de Iniciação Científica entitulado "Seleção de Hábitat e relações competitivas entre carnívoros em área fragmentada".
+
+
+## Premissas para a análise
+
+Serão consideradas situações de levantamentos de espécies em N locais específicos realizados em T ocasiões distintas no tempo.
+Os locais são ocupados pelas espécies de interesse durante o período da pesquisa, sem novos locais sendo ocupados após o início da pesquisa e nenhum local abandonado antes da interrupção da pesquisa (ou seja, os locais são "fechados").
+Em cada ocasião de amostragem, os pesquisadores usam métodos de amostragem projetados para detectar as espécies de interesse.
+As espécies nunca são falsamente detectadas em um local quando ausentes, e uma espécie pode ou não ser detectada em um local quando presente. A detecção das espécies em um local também é considerada independente da detecção das espécies em todos os outros locais.
+Os dados resultantes para cada site podem ser registrados como um vetor de 1 e 0, denotando detecção e não detecção, respectivamente, para as ocasiões em que o site foi amostrado. O conjunto de tais históricos de detecção é usado para estimar a quantidade de interesse, a proporção de locais ocupados pelas espécies.
+
+## Estrutura do diretório
+``` bash
+projeto
+|   README.Rmd
+|___data
+|   |   occurrence.xlsx
+|   |   variables.xlsx
+|___figs
+|___output
+```
+
+## Inputs
+
+## Modelagem
+
+### Detecção
+
+### Ocupação
+
+## Outputs
+
+São necessário dois inputs, uma tabela com as características dos sites
 There are two inputs to the analysis, the spacial variables charactherizing each site, and the species occurence table. The blank cells will be consider a *NAN*.  
 
 #### Species data
@@ -59,23 +88,32 @@ dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf) # covariates bi
 ```
 
 The `occu( ~ detection ~ occupancy)` function is a two-sided function and consider the detection and the occupancy.  
+
 **Atention**
+
 The model selection is based on **Akaike Information Criterion (AIC)**, and it's important to look at the result to decide the next step.  
 **Output**
+
 Write a table with the results, they can be usefull to check the results. Because the output is a S4 class method it is not possible to simply write it automatically, so it has to be by hand.
 
 #### Intermadiate step
+
 In case the model selected is a function of covariates p(var), then an extra-step is necessary. This is necessary to evaluate the fixed effect terms in the global model.
-It has outputs, the first one is the models ranked by AIC, and is based on the models selected in this table is going to used in the occupancy modeling. 
+
+**Output 1**
+
+The first one is the models ranked by AIC, and is based on the models selected in this table is going to used in the occupancy modeling. 
 
 ```{r det-dredge(), eval=FALSE}
 dd.cfm <- dredge(dec3.cfm)
 ```
 
+**Output 2**
+
 The second output is important to describe the covariates influence in the detection, and is basically the mean values, and its associated standard deviations, of the covariate parameters of the ranked models. 
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 library(readxl)
 library(vegan)
 library(unmarked)
