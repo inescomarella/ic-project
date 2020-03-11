@@ -5,7 +5,7 @@ output: html_document
 ---
 
 
-Modelo de ocupação single-season single-species para espécies não marcadas de acordo com o proposto por MacKenzie et al. (2002). Segue o método **stepwise** de seleção de variáveis.
+Modelo de ocupação single-season single-species para espécies não marcadas de acordo com o proposto por MacKenzie et al. (2002).
 
 
 ## Motivação
