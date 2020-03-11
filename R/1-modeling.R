@@ -1,17 +1,12 @@
 ##### Script modified based on TutorialOcupacaoInes.R sent by Marina Zanin in November 11th, 2019.
 
 #### Single-season single-species occupancy model to unmarked species
-#### It follows the stepwise variable selection method
 #### The analysis has two parts, the first one is to model the detection, the second one is to model the occupancy based on the detection model selected in the previous step.
 
 
 # 0. Loading packages  -----
-library(readxl)
-library(vegan)
-library(unmarked)
-library(MuMIn)
-library(plotrix)
-
+x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
+lapply(x, library, character.only = TRUE)
 
 # 1. Importing explanatory variables =====
 # This first step is equal to all species
@@ -33,7 +28,7 @@ Var <-
 
 # 2.1. Importing species data -----
 cfm <- read_excel("./data/occu-7x1.xlsx",
-                  sheet = "sp10")
+                  sheet = "sp7")
 cfm <- cfm[, -1]
 View(cfm)
 
@@ -116,7 +111,7 @@ View(importancia.var.cfm)
 #Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ 1
 
 dec.sel.cfm <-
-  occu( ~ 1 ~ 1, cfm.umf)
+  occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
 det.cfm.pred <-
   predict(dec.sel.cfm, type = "det", appendData = TRUE)
 colMeans(det.cfm.pred[, 1:4])
@@ -159,7 +154,7 @@ write.table(
 # Just to remember the covariates: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
 
 ocu.cfm <-
-  occu(~ 1 ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
+  occu(~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
 dd.ocu.cfm <- dredge(ocu.cfm)
 View(dd.ocu.cfm) # Ordered by AIC
 
@@ -384,7 +379,7 @@ op <-
 
 binomnames.det <-
   expression(bold(paste(
-    "Variáveis de detecção - ", italic("Leopardus pardalis"), ""
+    "Variáveis de detecção - ", italic("Lontra longicaudis"), ""
   )))
 title(binomnames.det, line = 1, outer = TRUE)
 dev.off()

@@ -5,7 +5,7 @@ output: html_document
 ---
 
 
-Modelo de ocupação single-season single-species para espécies não marcadas de acordo com o proposto por MacKenzie et al. (2002). Segue o método **stepwise** de seleção de variáveis.
+Modelo de ocupação single-season single-species para espécies não marcadas de acordo com o proposto por MacKenzie et al. (2002).
 
 
 ## Motivação
@@ -21,26 +21,16 @@ Em cada ocasião de amostragem, os pesquisadores usam métodos de amostragem pro
 As espécies nunca são falsamente detectadas em um local quando ausentes, e uma espécie pode ou não ser detectada em um local quando presente. A detecção das espécies em um local também é considerada independente da detecção das espécies em todos os outros locais.
 Os dados resultantes para cada site podem ser registrados como um vetor de 1 e 0, denotando detecção e não detecção, respectivamente, para as ocasiões em que o site foi amostrado. O conjunto de tais históricos de detecção é usado para estimar a quantidade de interesse, a proporção de locais ocupados pelas espécies.
 
-## Estrutura do diretório
-``` bash
-projeto
-|   README.Rmd
-|___data
-|   |   occurrence.xlsx
-|   |   variables.xlsx
-|___figs
-|___output
-```
 
 ## Inputs
 Variáveis explanatórias e tabela de detecção/não-detecção em excel.
 Atenção: separação decimal por ponto, e tabela de detecção/não-detecção preenchida apenas por 0 e 1, sendo que 0 significa não-detecção, na ausência de dado (por exemplo no caso de armadilhas fotográficas com diferentes períodos de amostragem) a célula deve ser deixada vazia (nada de " - ").
 
 ## Modelagem
-Após o input dos dados e preparação dos mesmos é vem o principal que é a modelagem, ela é dividida em duas etapas, na primeira é estimada a probabilidade de detectar as e usada em uma segunda etapa para estimar o parâmetro da ocupação.
+Após o input dos dados e preparação dos mesmos vem o principal, que é a modelagem. Ela é dividida em duas etapas, na primeira é estimada a probabilidade de detectar a espécie e essa probabilidade é usada em uma segunda etapa para estimar o parâmetro da ocupação.
 
 ### Primeira etapa: Detecção
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(DiagrammeR)
 grViz("digraph flowchart {
       # node definitions with substituted label text
@@ -59,15 +49,59 @@ grViz("digraph flowchart {
       tab4 -> tab5
       }
 
-      [1]: 'Testar os modelos de detecção psi(.)p(.), psi(.)p(t), psi(.)p(var)'
-      [2]: 'Caso seja selecionado o modelo psi(.)p(var)'
-      [3]: 'Gerar modelos de detecção com base nas covariáveis'
-      [4]: 'Caso o seja selecionado o modelo psi(.)p(t), ou psi(.)p(.)'
-      [5]: 'Escrever modelo de detecção final'
+      [1]: '1. Testar os modelos de detecção psi(.)p(.), psi(.)p(t), psi(.)p(var)'
+      [2]: '1.2.B1 Caso seja selecionado o modelo psi(.)p(var)'
+      [3]: '1.2.B2 Gerar modelos de detecção com base nas covariáveis'
+      [4]: '1.2.A Caso o seja selecionado o modelo psi(.)p(t), ou psi(.)p(.)'
+      [5]: '1.3. Escrever modelo de detecção final'
 
       ")
 ```
+1. Testando o modelo de detecção nulo p(.) em relação ao modelo de detecção com covariáveis p(var)   
+A detecção de espécies pode ser influenciada pelas condições do local p (var) ou pelo tempo de amostragem p (t) ou talvez seja aleatório p(.). Portanto, o primeiro passo para modelar o viés de detecção é testar qual dos modelos é mais explicativo e para isso é feito o rankeamento dos mesmos pelo $\Delta$AIC.
 
+```{r Detection bias hipothesis, eval=FALSE, message=FALSE, warning=FALSE}
+# Detection bias hipothesis
+dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf) # modelo nulo
+dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf) # viés de tempo de detecção
+dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf) # viés de detecção pelas covariáveis
+````
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+x <- c("readxl", "vegan", "unmarked", "MuMIn")
+y <- lapply(x, library, character.only = TRUE)
+VariaveisExp <-
+  read_excel("./data/VariaveisExp.xlsx", sheet = "VarExp")
+
+Var <- VariaveisExp[, c(5:8, 10)]
+# Binding person and car presence in one single variable
+Var <- cbind(Var, VariaveisExp[, 14] + VariaveisExp[, 15])
+
+# Standardizing data
+Var <-
+  decostand(Var, method = "standardize", MARGIN = 2)
+cfm <- read_excel("./data/occu-7x1.xlsx",
+                  sheet = "sp7")
+cfm <- cfm[, -1]
+
+cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
+
+# Detection bias hipothesis
+dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf)
+dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf)
+dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
+
+# Creating a list of models
+dec.list.cfm <-
+  fitList(
+    "psi(.)p(.)" = dec1.cfm,
+    "psi(.)p(t)" = dec2.cfm,
+    "psi(.)p(var)" = dec3.cfm
+  )
+ms.dec.cfm <- modSel(dec.list.cfm)
+ms.dec.cfm   # Ordered by AIC
+```
 
 ### Segunda etapa: Ocupação
 
@@ -111,12 +145,6 @@ cfm <- read_excel("./data/occu-10x1.xlsx",
 ##### Detection bias hipothesis
 Species detection can be biased by the site conditions p(var), or by the sampling time p(t) or maybe it can be random p(.). So the first step to model the detection bias is to test those models hipothesis.
 
-```{r Detection bias hipothesis, eval=FALSE}
-# Detection bias hipothesis
-dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf) # null model
-dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf) # sampling time bias
-dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf) # covariates bias
-```
 
 The `occu( ~ detection ~ occupancy)` function is a two-sided function and consider the detection and the occupancy.  
 
