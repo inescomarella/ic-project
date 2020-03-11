@@ -33,7 +33,7 @@ Var <-
 
 # 2.1. Importing species data -----
 cfm <- read_excel("./data/occu-7x1.xlsx",
-                  sheet = "sp3")
+                  sheet = "sp10")
 cfm <- cfm[, -1]
 View(cfm)
 
@@ -384,7 +384,7 @@ op <-
 
 binomnames.det <-
   expression(bold(paste(
-    "Variáveis de detecção - ", italic("Lontra longicaudis"), ""
+    "Variáveis de detecção - ", italic("Leopardus pardalis"), ""
   )))
 title(binomnames.det, line = 1, outer = TRUE)
 dev.off()
