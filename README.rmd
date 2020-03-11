@@ -33,12 +33,43 @@ projeto
 ```
 
 ## Inputs
+Variáveis explanatórias e tabela de detecção/não-detecção em excel.
+Atenção: separação decimal por ponto, e tabela de detecção/não-detecção preenchida apenas por 0 e 1, sendo que 0 significa não-detecção, na ausência de dado (por exemplo no caso de armadilhas fotográficas com diferentes períodos de amostragem) a célula deve ser deixada vazia (nada de " - ").
 
 ## Modelagem
+Após o input dos dados e preparação dos mesmos é vem o principal que é a modelagem, ela é dividida em duas etapas, na primeira é estimada a probabilidade de detectar as e usada em uma segunda etapa para estimar o parâmetro da ocupação.
 
-### Detecção
+### Primeira etapa: Detecção
+```{r echo=FALSE}
+library(DiagrammeR)
+grViz("digraph flowchart {
+      # node definitions with substituted label text
+      node [fontname = Helvetica, shape = rectangle]        
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3']
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
 
-### Ocupação
+      # edge definitions with the node IDs
+      tab1 -> tab2;
+      tab1 -> tab4;
+      tab2 -> tab3;
+      tab3 -> tab5;
+      tab4 -> tab5
+      }
+
+      [1]: 'Testar os modelos de detecção psi(.)p(.), psi(.)p(t), psi(.)p(var)'
+      [2]: 'Caso seja selecionado o modelo psi(.)p(var)'
+      [3]: 'Gerar modelos de detecção com base nas covariáveis'
+      [4]: 'Caso o seja selecionado o modelo psi(.)p(t), ou psi(.)p(.)'
+      [5]: 'Escrever modelo de detecção final'
+
+      ")
+```
+
+
+### Segunda etapa: Ocupação
 
 ## Outputs
 
