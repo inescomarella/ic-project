@@ -58,26 +58,6 @@ ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordered by AIC
 View(ms.dec.cfm)
 
-# 3.1.1. Exporting list of detection models ----
-# As the modSel output is S4 class method it is not possible to coerse it to dataframe and export
-# Fill the dataframe according to the modSel
-det_list_df <- data.frame(
-  nPars = c(2, 7, 5),
-  AIC = c(126.65, 128.49, 133.92),
-  delta = c(0.00, 1.84, 7.27),
-  AICwt = c(0.701, 0.280, 0.019),
-  cumltvWt = c(0.70, 0.98, 1.00),
-  Species = "sp3",
-  row.names = c("psi(.)p(.)", "psi(.)p(var)", "psi(.)p(t)")
-)
-det_list_df
-write.table(
-  det_list_df,
-  file = "./output/detection-models-10x1-sp4.csv",
-  sep = ",",
-  row.names = TRUE,
-  col.names = NA
-)
 # 3.2. Intermediate step -----
 # If the detection model selected is influenced by the covariates "psi(.)p(var)", then it is necessary to disintegrate the function dec3 according to Akaike criterion
 dd.cfm <- dredge(dec3.cfm)
@@ -116,16 +96,19 @@ det.cfm.pred <-
   predict(dec.sel.cfm, type = "det", appendData = TRUE)
 colMeans(det.cfm.pred[, 1:4])
 
-# Specifying species and model in the table
-sp_det_model <- matrix(NA, nrow = 1, ncol = 2)
-colnames(sp_det_model) <- c("Species", "Model")
-sp_det_model[,1] <- "sp10"
-sp_det_model[,2] <- "p(.)"
+
 
 # 3.3.1. Exporting final detection model ----
-det_final <- t(colMeans(det.cfm.pred[, 1:4]))
-det_final_sp <- cbind(det_final, sp_det_model)
-det_final_sp
+# Specifying species and model in the table
+dec.sel.cfm # confere o modelo
+sp_det_model <- matrix(NA, nrow = 1, ncol = 2)
+colnames(sp_det_model) <- c("Species", "Model")
+sp_det_model[,1] <- "sp10" # especifica a espécie
+sp_det_model[,2] <- "p(.)" # especifica o modelo
+
+det_final <- t(colMeans(det.cfm.pred[, 1:4])) # prepara a tabela
+det_final_sp <- cbind(det_final, sp_det_model) # identifica a espécie e o modelo da tabela
+det_final_sp # confere
 
 write.table(
   det_final_sp,
@@ -196,17 +179,20 @@ ocu.sel.cfm <-
 ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
 colMeans(ocu.pred.cfm)
 
+
+# 4.3.1. Exporting final occupancy model ----
+ocu.sel.cfm # confere o modelo
+
 # Specifying species and model in the table
 sp_occu_model <- matrix(NA, nrow = 1, ncol = 2)
 colnames(sp_occu_model) <- c("Species", "Model")
-sp_occu_model[,1] <- "sp1"
-sp_occu_model[,2] <- "p(.)psi(RS1 + RS3 + RAI_Hum)"
+sp_occu_model[,1] <- "sp1" # especifica a espécie
+sp_occu_model[,2] <- "p(.)psi(RS1 + RS3 + RAI_Hum)" # especifica o modelo
 
-# 4.3.1. Exporting final occupancy model ----
-occu_final <- t(colMeans(ocu.pred.cfm))
+occu_final <- t(colMeans(ocu.pred.cfm)) # prepara a tabela
 
 # Specifying the species in the table
-occu_final_sp <- cbind(occu_final, sp_occu_model)
+occu_final_sp <- cbind(occu_final, sp_occu_model) # identifica a espécie o modelo na tabela
 
 write.table(
   occu_final_sp,
@@ -238,8 +224,30 @@ Species <- "sp10"
 sp_name <- read_excel("./data/species-names.xlsx")
 sp_name
 
+# 5.1. Exporting list of detection models ----
+ms.dec.cfm
+# As the modSel output is S4 class method it is not possible to coerse it to dataframe and export
+# Fill the dataframe according to the modSel
+det_list_df <- data.frame(
+  nPars = c(2, 7, 5),
+  AIC = c(126.65, 128.49, 133.92),
+  delta = c(0.00, 1.84, 7.27),
+  AICwt = c(0.701, 0.280, 0.019),
+  cumltvWt = c(0.70, 0.98, 1.00),
+  Species = "sp3",
+  row.names = c("psi(.)p(.)", "psi(.)p(var)", "psi(.)p(t)")
+)
+det_list_df
+write.table(
+  det_list_df,
+  file = "./output/detection-models-10x1-sp4.csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
 
-# 5.1. Exporting detection models p(var) ----
+
+# 5.2. Exporting detection models p(var) ----
 dd.cfm_sp <- cbind(dd.cfm, Species)
 write.table(
   dd.cfm_sp,
@@ -249,7 +257,7 @@ write.table(
   col.names = NA
 )
 
-# 5.2. Exporting detection covariates mean ----
+# 5.3. Exporting detection covariates mean ----
 importancia.var.cfm_sp <- cbind(importancia.var.cfm, Species)
 write.table(
   importancia.var.cfm_sp,
@@ -259,7 +267,7 @@ write.table(
   col.names = NA
 )
 
-# 5.3. Exporting occupancy models ----
+# 5.4. Exporting occupancy models ----
 dd.ocu.cfm_sp <- cbind(dd.ocu.cfm, Species)
 write.table(
   dd.ocu.cfm_sp,
@@ -268,7 +276,7 @@ write.table(
   row.names = TRUE,
   col.names = NA
 )
-# 5.4. Exporting covariate influence in occupancy ----
+# 5.5. Exporting covariate influence in occupancy ----
 OCU.importancia.var.cfm_sp <-
   cbind(OCU.importancia.var.cfm, Species)
 write.table(
@@ -279,7 +287,7 @@ write.table(
   col.names = NA
 )
 
-# 5.5. Exporting graph 1 ----
+# 5.6. Exporting graph 1 ----
 png(
   "figs/detection-covariates-10x1-sp10.png",
   res = 300,
@@ -386,7 +394,7 @@ dev.off()
 
 
 
-# 5.6. Exporting graph 2 ----
+# 5.7. Exporting graph 2 ----
 png(
   "figs/occupancy-covariates-10x1-sp1.png",
   res = 300,
