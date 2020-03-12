@@ -40,13 +40,23 @@ O script segue uma estrutura de pastas relativa, como segue:
 
 
 # Inputs
-Variáveis explanatórias e tabela de detecção/não-detecção em excel. Necessário adaptar o script em caso de formatos diferentes e em caso de estrutura de pastas diferentes.
 
-Atenção: separação decimal por ponto e tabela de detecção/não-detecção preenchida apenas por 0 e 1, sendo que 0 significa não-detecção, em caso ausência de dado (por exemplo, no caso de armadilhas fotográficas com diferentes períodos de amostragem) a célula deve ser deixada vazia.
+São necessários 2 inputs, 1. as variáveis que serão usadas nos modelos e a 2. tabela com histórico de detecção.
+
+* As variáveis devem ser selecionadas com base na biologia da espécie e devem ser independentes. Para aprofundamento seleção de variáveis recomendo a leitura de @Burnham2001.
+
+* A tabela com o histórico de detecção da espécie deve ser preenchida apenas por 0 e 1, sendo que 0 significa não-detecção, em caso ausência de dado (por exemplo, no caso de armadilhas fotográficas com diferentes períodos de amostragem) a célula deve ser deixada vazia.
+
+Script para a leitura dos arquivos em excel, logo é necessário adaptação em caso de formatos diferentes e em caso de estrutura de pastas diferentes.
+
+
 
 
 # Modelagem
-Após o input dos dados e preparação dos mesmos vem o principal, que é a modelagem. Ela é dividida em duas etapas, na primeira é estimada a probabilidade de detectar a espécie e essa probabilidade é usada em uma segunda etapa para estimar o parâmetro da ocupação.
+Após o input dos dados e a preparação dos mesmos vem o principal, que é a modelagem. 
+Ela é dividida em duas etapas, na primeira é estimada a probabilidade de detectar a espécie e essa probabilidade é usada em uma segunda etapa para estimar o parâmetro da ocupação. 
+
+A forma como iremos nos referir aos modelos será por `psi()p()`, esta função irá descrever as variáveis explanatórias da detecção -`psi()`- e da ocupação -`p()`. A ausência de variáveis (modelo nulo) será descrita como `psi(.)p(.)`
 
 ## Primeira etapa: Detecção
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -77,9 +87,12 @@ grViz("digraph flowchart {
       ")
 ```
 
-### 1. Testando o modelo de detecção nulo p(.) em relação ao modelo de detecção com covariáveis p(var)   
+### 1. Avaliando 3 modelos: nulo p(.), viés de tempo de detecção p(t), viés pelas variáveis p(var)
 
-A detecção de espécies pode ser influenciada pelas condições do local p (var) ou pelo tempo de amostragem p (t) ou talvez seja aleatório p(.). Portanto, o primeiro passo para modelar o viés de detecção é testar qual dos modelos é mais explicativo e para isso é feito o rankeamento dos mesmos pelo $\Delta$AIC.
+Primeiro vamos estabelecer 3 modelos de detecção fixando a ocupação como nula. Chamaremos de dec1 o modelo nulo p(.), dec2 o modelo influenciado pelo tempo de detecção p(t), e dec3 o modelo determinado pela variáveis p(var). Escreva o nome das variáveis selecionadas para o modelo de detecção de acordo com o nome nos inputs.
+
+É importante testar o viés do tempo de detecção em caso de diferentes períodos de detecção, que acontece comumente em levantamentos por armadilha fotográfica onde as câmeras possuem períodos de atividades distintos (porque acabou a pilha, ou por diferentes dias de instalação e remoção, etc.)
+
 
 ```{r Modelos de detecção, eval=FALSE, message=FALSE, warning=FALSE}
 # Hipóteses de modelo de detecção
@@ -88,9 +101,9 @@ dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf) # viés de tempo de detecção
 dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf) # viés de detecção pelas covariáveis
 ````
 
-A função `occu( ~ detecção ~ ocupação)`  faz o encaixe no modelo  de ocupação de estação única (*fits single-season models*) como proposto por MacKenzie et al (2002), com base em uma fórmula dupla à direita, descrevendo covariáveis de detecção e ocupação nessa ordem.
+A função `occu( ~ detecção ~ ocupação)`  faz o encaixe no modelo de ocupação de estação única (*fits single-season models*) como proposto por @MacKenzie2002, com base em uma fórmula dupla que descreve covariáveis de detecção e ocupação nessa ordem.
 
-Após o encaixe dos modelos vem a seleção dos modelos com base no Critério de Informação de Akaike:
+Após o encaixe dos modelos vem a seleção dos modelos com base no Critério de Informação de Akaike. A função `modSel` rankeia uma lista de modelos (nesse caso gerados pela função `fitList`) baseado no AIC. 
 
 ```{r seleção de modelo, eval=FALSE, message=FALSE, warning=FALSE}
 # Criando a lista de modelos
@@ -104,8 +117,12 @@ ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordenado pelo AIC
 ```
 
+____
+Esta etapa possui um output, que é a tabela com os 3 modelos rankeados.
 
 ### 1.2.A Caso o seja selecionado o modelo psi(.)p(t), ou psi(.)p(.)
+
+Exemplo de uma espécie em que o modelo de detecção é nulo. Neste caso basta seguir para a etapa final da modelagem de detecção, a **etapa 1.3**.
 
 ```{r p(.), echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn")
@@ -142,9 +159,10 @@ ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordered by AIC
 ```
 
-Siga para a etapa 1.3
 
 ### 1.2.B1 Caso seja selecionado o modelo psi(.)p(var)
+
+Exemplo de uma espécie em que o modelo de detecção é é determinado pelas variáveis. Neste caso deve-se avaliar a melhor combinação das covariáveis, por isso siga para a **etapa 1.2.B2**.
 
 ```{r p(var), echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn")
@@ -181,9 +199,9 @@ ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordered by AIC
 ```
 
-É necessário fazer a desagregação das covariáveis e testar diferentes combinações das mesmas.
-
 ### 1.2.B2 Gerando modelos de detecção com base nas covariáveis
+
+A seleção da melhor combinação de variáveis que descreverá o modelo de detecção final envolve o rankeamento dos modelos de detecção com todas as combinações de covariáveis do modelo global. Para isso usaremos a função `dredge(global.model)`, que gera uma tabela de seleção de modelos com combinações (subconjuntos) de termos de efeito fixo no modelo global. Sendo que o modelo global é o modelo gerado pela função `occu()`.
 
 ```{r eval=FALSE}
 # 3.2. Etapda Intermediária -----
@@ -193,8 +211,8 @@ dd.cfm <- dredge(dec3.cfm)
 dd.cfm   # Ordenado pelo AICc
 ```
 
+O resultado é uma tabela como abaixo:
 
-A função `dredge(global.model)` gera uma tabela de seleção de modelos com combinações (subconjuntos) de termos de efeito fixo no modelo global. Sendo que o modelo global é o modelo gerado pela função `occu()`.
 
 ```{r gerando os modelos detecção, echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
@@ -214,11 +232,190 @@ dd.cfm <- dredge(dec3.cfm)
 dd.cfm   # Ordered by AIC
 ```
 
+Como mais de um modelo se mostrou igualmente parcimonioso então é necessário selecionar as variáveis com base na influência das mesmas nos modelos. Para isso iremos olhar a média e desvio padrão dos modelos que contém cada covariável e com base no efeito da covariável nos modelos iremos selecionar as covariáveis que farão parte do modelo de detecção final.
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
+y <- lapply(x, library, character.only = TRUE)
+VariaveisExp <-
+  read_excel("./data/VariaveisExp.xlsx", sheet = "VarExp")
+Var <- VariaveisExp[, c(5:8, 10)]
+Var <- cbind(Var, VariaveisExp[, 14] + VariaveisExp[, 15])
+Var <-
+  decostand(Var, method = "standardize", MARGIN = 2)
+cfm <- read_excel("./data/occu-7x1.xlsx",
+                  sheet = "sp1")
+cfm <- cfm[, -1]
+cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
+dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
+dd.cfm <- dredge(dec3.cfm)
+table <- as.matrix(dd.cfm)
+importancia.var.cfm <- matrix(NA, nrow = 5, ncol = 6)
+rownames(importancia.var.cfm) <-
+  c("p(Int)", "psi(Int)", "p(DsB_PLA)", "p(ele)",
+    "p(RAI_Hum)")
+colnames(importancia.var.cfm) <-
+  c("coef.mean",
+    "coef.sd",
+    "w.mean",
+    "w.sd",
+    "delta.mean",
+    "delta.sd"
+)
+
+for (i in 1:5) {
+  temp <- na.omit(table[, c(i, 9, 10)])
+  sd.t <- apply(temp, 2, sd)
+  mean.t <- apply(temp, 2, mean)
+  importancia.var.cfm[i, ] <-
+    c(mean.t, sd.t)
+}
+importancia.var.cfm
+
+```
+
+Para melhor visualização ao final do script, na sessão de outputs, é possível plotar os resultado graficamente.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
+y <- lapply(x, library, character.only = TRUE)
+VariaveisExp <-
+  read_excel("./data/VariaveisExp.xlsx", sheet = "VarExp")
+Var <- VariaveisExp[, c(5:8, 10)]
+Var <- cbind(Var, VariaveisExp[, 14] + VariaveisExp[, 15])
+Var <-
+  decostand(Var, method = "standardize", MARGIN = 2)
+cfm <- read_excel("./data/occu-7x1.xlsx",
+                  sheet = "sp1")
+cfm <- cfm[, -1]
+cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
+dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
+dd.cfm <- dredge(dec3.cfm)
+table <- as.matrix(dd.cfm)
+importancia.var.cfm <- matrix(NA, nrow = 5, ncol = 6)
+rownames(importancia.var.cfm) <-
+  c("p(Int)", "psi(Int)", "p(DsB_PLA)", "p(ele)",
+    "p(RAI_Hum)")
+colnames(importancia.var.cfm) <-
+  c("coef.mean",
+    "coef.sd",
+    "w.mean",
+    "w.sd",
+    "delta.mean",
+    "delta.sd"
+)
+
+for (i in 1:5) {
+  temp <- na.omit(table[, c(i, 9, 10)])
+  sd.t <- apply(temp, 2, sd)
+  mean.t <- apply(temp, 2, mean)
+  importancia.var.cfm[i, ] <-
+    c(mean.t, sd.t)
+}
+par(mfrow = c(2, 2))
+op <-
+  par(
+    mfrow = c(2, 2),
+    mar = c(4.1, 3.1, 1, 1.1),
+    oma = c(0.5, 0.5, 4, 0.5),
+    xpd = NA
+  )
+
+{
+  plotCI(
+    x = 1:5,
+    y = importancia.var.cfm[, 1],
+    uiw = importancia.var.cfm[, 2],
+    yaxt = "n",
+    xaxt = "n",
+    ylab = "Coeficiente de regressão",
+    xlab = NA,
+    mgp = c(2, 1, 0)
+  )
+  axis(side = 1,
+       at = seq(1, 5),
+       labels = FALSE)
+  axis(side = 2,
+       labels = TRUE,
+       cex.axis = 0.7,
+  )
+  text(
+    x = seq(1, 5, by = 1),
+    par("usr")[3] - 0.25,
+    labels = rownames(importancia.var.cfm),
+    cex = 0.73,
+    srt = 25,
+    adj = c(0.8, 1.7)
+  )
+  }
+
+{
+  plotCI(
+    x = 1:5,
+    y = importancia.var.cfm[, 3],
+    uiw = importancia.var.cfm[, 4],
+    yaxt = "n",
+    xaxt = "n",
+    ylab = "weight",
+    xlab = NA,
+    mgp = c(2, 1, 0)
+  )
+  axis(side = 1,
+       at = seq(1, 5),
+       labels = FALSE)
+  axis(side = 2,
+       labels = TRUE,
+       cex.axis = 0.7)
+  text(
+    x = seq(1, 5, by = 1),
+    par("usr")[3],
+    labels = rownames(importancia.var.cfm),
+    cex = 0.73,
+    srt = 25,
+    adj = c(0.8, 1.9)
+  )
+}
+
+{
+  plotCI(
+    x = 1:5,
+    y = importancia.var.cfm[, 5],
+    uiw = importancia.var.cfm[, 6],
+    yaxt = "n",
+    xaxt = "n",
+    ylab = "delta AIC",
+    xlab = NA,
+    mgp = c(2, 1, 0)
+  )
+  axis(side = 1,
+       at = seq(1, 5),
+       labels = FALSE)
+  axis(side = 2,
+       labels = TRUE,
+       cex.axis = 0.7)
+  text(
+    x = seq(1, 5, by = 1),
+    par("usr")[3] - 0,
+    labels = rownames(importancia.var.cfm),
+    cex = 0.73,
+    srt = 25,
+    adj = c(0.8, 1.9)
+  )
+}
+
+binomnames.det <-
+  expression(bold(paste(
+    "Variáveis de detecção - ", italic("sp1"), ""
+  )))
+title(binomnames.det, line = 1, outer = TRUE)
+```
+
+____
+Esta etapa gera 3 outputs, a tabela com os modelos das combinações de variáveis, a tabela com a média e desvio padrão das variáveis separadamente e o gráfico com as mesmas médias e desvios padrões.
 
 ### 1.3 Fazendo a predição do modelo
 
-Uma vez que um modelo de detecção é selecionado segue-se então a última etapa da modelagem de ocupação é testar a predição do modelo selecionado.
+Uma vez que uma função final de modelo de detecção é determinado segue-se então a última etapa da modelagem de detecção, que é avaliar a predição do modelo selecionado e a predição da detecção por site. 
 
 ```{r eval=FALSE}
 dec.sel.cfm <-
@@ -249,7 +446,8 @@ det.cfm.pred <-
 colMeans(det.cfm.pred[, 1:4])
 ```
 
-
+_____
+Esta etapa gera 2 outputs, a predição do modelo geral, e a predição da detcção por site.
 
 ## Segunda etapa: Ocupação
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -272,7 +470,7 @@ grViz("digraph flowchart {
       }
 
       [1]: '2. Modelo global de ocupação'
-      [2]: '2.1.B1 Caso mais de um modelo tenha sido selecionado'
+      [2]: '2.1.B1 Caso mais de um modelo seja explicativo'
       [3]: '2.1.B2 Testar subconjuntos das covariáveis do modelo global'
       [4]: '2.1.A Caso apenas um modelo seja explicativo'
       [5]: '2.2. Predição com base modelo de ocupação'
@@ -282,7 +480,9 @@ grViz("digraph flowchart {
 
 ### 2. Modelo global de ocupação
 
-Mais uma vez será usada a função `occu()`, porém desta vez a ocupação não será fixa. Escreva um modelo global para a ocupação com base nas variáveis que poderiam estar influenciando a ocupação da espécie. Repita a função do modelo de detecção utilizado na etapa 1.2, de agora em diante a detecção será fixa, e será avaliada apenas a ocupação.
+Mais uma vez será usada a função `occu()`, porém desta vez a ocupação não será fixa. 
+
+Escreva um modelo global para a ocupação com base nas variáveis que poderiam estar influenciando a ocupação da espécie. Repita a função do modelo de detecção utilizado na etapa 1.2, de agora em diante a detecção será fixa, e será avaliada apenas a ocupação.
 
 ```{r eval=FALSE}
 # 4.1. Avalie os modelos de ocupação ####
@@ -296,8 +496,12 @@ View(dd.ocu.cfm) # Ordenado pelo AICc
 
 ```
 
+____
+Esta etapa gera um output dos modelos de ocupação com diferentes combinações de covariáveis.
 
 ### 2.1.B1 Caso mais de um modelo tenha sido selecionado
+
+Exemplo de uma espécie em que mais de um modelo de ocupação foi explicativo/parcimonioso. Neste caso deve-se avaliar a selecionar as covariáveis com base na influência das mesma nos modelos, para isso siga para a **etapa 2.1.B2**.
 
 ```{r gerando os modelos ocupação, echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
@@ -320,9 +524,10 @@ dd.ocu.cfm.sub # Ordered by AIC
 
 ```
 
-Neste caso é necessário seguir para a etapa 2.1.B2
 
 ### 2.1.B2 Avaliar as covariáveis isoladamente
+
+Assim como na detecção, qaundo mais de um modelo se mostra igualmente parcimonioso é necessário selecionar as variáveis com base na influência das mesmas nos modelos. Para isso olharemos a média e desvio padrão dos modelos que contém cada covariável e com base no efeito da covariável nos modelos iremos selecionar quais farão parte do modelo de ocupação final.
 
 ```{r etapa intermediaria ocupação, echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
@@ -366,12 +571,16 @@ OCU.importancia.var.cfm
 
 ```
 
-
+Para visualizar graficamente basta plotar o gráfico no final do script, na sessão de exportar outputs.
+____
+Esta etapa gera 2 outputs, a tabela com a média e desvio padrão das variáveis separadamente e o gráfico com as mesmas mésdias e desvios padrões.
 
 ### 2.1.A Caso apenas um modelo seja explicativo
-
+Neste caso apenas prossiga para a etapa final de predição, **etapa 2.2**.
 
 ### 2.2. Predição com base modelo de ocupação
+
+Escreva a função contendo as covariáveis selecionada para a detecção e para a oucpação. Mais uma vez será usada a função `predict()`, o qual resultará na predição do modelo de ocupação geral e na predição da ocupação por site.
 
 ```{r eval=FALSE}
 ocu.sel.cfm <-
@@ -401,6 +610,8 @@ colMeans(ocu.pred.cfm)
 
 ```
 
+____
+Esta etapa gera 2 outputs, a predição do modelo geral, e a predição da detecção por site.
 
 # Outputs
 O número de outputs vai depender da espécie. O máximo são de 11 outputs, todos em .csv. Para visualizar os resultados use o script 2-manipulating-output.R

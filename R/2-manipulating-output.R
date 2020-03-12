@@ -2,18 +2,14 @@
 # http://www.sthda.com/english/wiki/r-xlsx-package-a-quick-start-guide-to-manipulate-excel-files-in-r
 
 
-# Manipulating the outputs ====
+# Unindo os outputs ====
 
-# I have 10 species, each generates 8 outputs in each occasion, and there are 4 occasion. So there is a total of 320 outputs.
-# I can analyse each occasion separately what will reduce my output to 40 (different species per occasion), but I was also curious about comparing among different occasion, in this case I'll add 10 outputs (different occasions per species)
-# First I'll consider one occasion, so I'll compare the species, then I'll compare the different occasions response in each species.
-
-# Loading packages ----
+# Carregando os pacotes ----
 x <- c("readxl", "openxlsx", "data.table")
 lapply(x, library, character.only = TRUE)
 
 
-# Reading outputs ----
+# Lendo os outputs ----
 ## files.path é um vetor de diretórios, não leu os arquivos ainda, tem apenas os diretórios
 occu_final_path <-
   list.files(path = "./output",
@@ -79,7 +75,7 @@ det_pVar_data <- lapply(det_pVar_path, read.csv)
 det_pVar <- rbindlist(det_pVar_data, fill = TRUE)
 
 
-# Creating the result file and sheets ----
+# Criando o arquivo dos resultado e as abas ----
 wb <- createWorkbook("./results/result-10x1.xlsx")
 addWorksheet(wb, "occu_final")
 addWorksheet(wb, "occu_persite")
@@ -91,7 +87,7 @@ addWorksheet(wb, "det_models")
 addWorksheet(wb, "det_cov")
 addWorksheet(wb, "det_pVar")
 
-# Writing the final results ----
+# Escrevendo os dados em cada aba ----
 writeData(wb, "occu_final", occu_final)
 writeData(wb, "occu_persite", occu_persite)
 writeData(wb, "occu_cov", occu_cov)
@@ -103,6 +99,6 @@ writeData(wb, "det_cov", det_cov)
 writeData(wb, "det_pVar", det_pVar)
 saveWorkbook(wb, "./results/result-detection-10x1.xlsx")
 
-# Opening the results file ----
+# Abrindo o arquivo com os resultados ----
 openXL("./results/result-detection-10x1.xlsx")
 
