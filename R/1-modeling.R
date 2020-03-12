@@ -56,7 +56,7 @@ dec.list.cfm <-
   )
 ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordered by AIC
-
+View(ms.dec.cfm)
 
 # 3.1.1. Exporting list of detection models ----
 # As the modSel output is S4 class method it is not possible to coerse it to dataframe and export
@@ -379,7 +379,7 @@ op <-
 
 binomnames.det <-
   expression(bold(paste(
-    "Variáveis de detecção - ", italic("Lontra longicaudis"), ""
+    "Variáveis de detecção - ", italic(""), ""
   )))
 title(binomnames.det, line = 1, outer = TRUE)
 dev.off()
