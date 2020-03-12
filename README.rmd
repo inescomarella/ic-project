@@ -37,6 +37,20 @@ Os dados resultantes para cada site podem ser registrados como um vetor de 1 e 0
 
 O script segue uma estrutura de pastas relativa, como segue:
 
+```
+.
+├── _R
+|   ├── 1-modeling.R
+|   └── 2-manipulating-output.R
+|
+├── _data
+|   ├── VariaveisExp.xlsx
+|   └── occu-7x1.xlsx
+├── _outputs
+|   
+└── _results
+```
+
 
 
 # Inputs
