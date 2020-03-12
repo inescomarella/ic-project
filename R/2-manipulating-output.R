@@ -9,9 +9,8 @@
 # First I'll consider one occasion, so I'll compare the species, then I'll compare the different occasions response in each species.
 
 # Loading packages ----
-library("readxl")
-library("openxlsx")
-library("data.table")
+x <- c("readxl", "openxlsx", "data.table")
+lapply(x, library, character.only = TRUE)
 
 
 # Reading outputs ----

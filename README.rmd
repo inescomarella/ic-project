@@ -9,18 +9,23 @@ output:
     gallery: FALSE
     highlight: tango
     cards: FALSE
+bibliography: doc/bibliography.bib
 ---
 
-Modelo de ocupação single-season single-species para espécies não marcadas de acordo com o proposto por MacKenzie et al. (2002).
+# Introdução
+
+Modelo de ocupação single-season single-species para espécies não marcadas de acordo com o proposto por @MacKenzie2002.
 
 
-## Motivação
+# Motivação
 
 
-Esse script é parte do meu projeto de Iniciação Científica entitulado "Seleção de Hábitat e relações competitivas entre carnívoros em área fragmentada".
+Essas análises fazem parte do meu projeto de Iniciação Científica entitulado "Seleção de Hábitat e relações competitivas entre carnívoros em área fragmentada".
 
 
-## Premissas para a análise
+# Premissas para a análise
+
+Seguindo o estabelecido por @MacKenzie2002:
 
 Serão consideradas situações de levantamentos de espécies em N locais específicos realizados em T ocasiões distintas no tempo.
 Os locais são ocupados pelas espécies de interesse durante o período da pesquisa, sem novos locais sendo ocupados após o início da pesquisa e nenhum local abandonado antes da interrupção da pesquisa (ou seja, os locais são "fechados").
@@ -28,16 +33,22 @@ Em cada ocasião de amostragem, os pesquisadores usam métodos de amostragem pro
 As espécies nunca são falsamente detectadas em um local quando ausentes, e uma espécie pode ou não ser detectada em um local quando presente. A detecção das espécies em um local também é considerada independente da detecção das espécies em todos os outros locais.
 Os dados resultantes para cada site podem ser registrados como um vetor de 1 e 0, denotando detecção e não detecção, respectivamente, para as ocasiões em que o site foi amostrado. O conjunto de tais históricos de detecção é usado para estimar a quantidade de interesse, a proporção de locais ocupados pelas espécies.
 
+# Estrutura de pastas sugerida
 
-## Inputs
+O script segue uma estrutura de pastas relativa, como segue:
+
+
+
+# Inputs
 Variáveis explanatórias e tabela de detecção/não-detecção em excel. Necessário adaptar o script em caso de formatos diferentes e em caso de estrutura de pastas diferentes.
 
 Atenção: separação decimal por ponto e tabela de detecção/não-detecção preenchida apenas por 0 e 1, sendo que 0 significa não-detecção, em caso ausência de dado (por exemplo, no caso de armadilhas fotográficas com diferentes períodos de amostragem) a célula deve ser deixada vazia.
 
-## Modelagem
+
+# Modelagem
 Após o input dos dados e preparação dos mesmos vem o principal, que é a modelagem. Ela é dividida em duas etapas, na primeira é estimada a probabilidade de detectar a espécie e essa probabilidade é usada em uma segunda etapa para estimar o parâmetro da ocupação.
 
-### Primeira etapa: Detecção
+## Primeira etapa: Detecção
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(DiagrammeR)
 grViz("digraph flowchart {
@@ -66,7 +77,7 @@ grViz("digraph flowchart {
       ")
 ```
 
-> 1. Testando o modelo de detecção nulo p(.) em relação ao modelo de detecção com covariáveis p(var)   
+### 1. Testando o modelo de detecção nulo p(.) em relação ao modelo de detecção com covariáveis p(var)   
 
 A detecção de espécies pode ser influenciada pelas condições do local p (var) ou pelo tempo de amostragem p (t) ou talvez seja aleatório p(.). Portanto, o primeiro passo para modelar o viés de detecção é testar qual dos modelos é mais explicativo e para isso é feito o rankeamento dos mesmos pelo $\Delta$AIC.
 
@@ -94,7 +105,7 @@ ms.dec.cfm   # Ordenado pelo AIC
 ```
 
 
-> 1.2.A Caso o seja selecionado o modelo psi(.)p(t), ou psi(.)p(.)
+### 1.2.A Caso o seja selecionado o modelo psi(.)p(t), ou psi(.)p(.)
 
 ```{r p(.), echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn")
@@ -133,7 +144,7 @@ ms.dec.cfm   # Ordered by AIC
 
 Siga para a etapa 1.3
 
-> 1.2.B1 Caso seja selecionado o modelo psi(.)p(var)
+### 1.2.B1 Caso seja selecionado o modelo psi(.)p(var)
 
 ```{r p(var), echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn")
@@ -172,7 +183,7 @@ ms.dec.cfm   # Ordered by AIC
 
 É necessário fazer a desagregação das covariáveis e testar diferentes combinações das mesmas.
 
-> 1.2.B2 Gerando modelos de detecção com base nas covariáveis
+### 1.2.B2 Gerando modelos de detecção com base nas covariáveis
 
 ```{r eval=FALSE}
 # 3.2. Etapda Intermediária -----
@@ -198,25 +209,14 @@ cfm <- read_excel("./data/occu-7x1.xlsx",
                   sheet = "sp1")
 cfm <- cfm[, -1]
 cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
-dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf)
-dec2.cfm <- occu( ~ obsNum ~ 1, cfm.umf)
 dec3.cfm <- occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf)
-
-dec.list.cfm <-
-  fitList(
-    "psi(.)p(.)" = dec1.cfm,
-    "psi(.)p(t)" = dec2.cfm,
-    "psi(.)p(var)" = dec3.cfm
-  )
-ms.dec.cfm <- modSel(dec.list.cfm)
-
 dd.cfm <- dredge(dec3.cfm)
 dd.cfm   # Ordered by AIC
 ```
 
 
 
-> 1.3 Fazendo a predição do modelo
+### 1.3 Fazendo a predição do modelo
 
 Uma vez que um modelo de detecção é selecionado segue-se então a última etapa da modelagem de ocupação é testar a predição do modelo selecionado.
 
@@ -251,7 +251,7 @@ colMeans(det.cfm.pred[, 1:4])
 
 
 
-### Segunda etapa: Ocupação
+## Segunda etapa: Ocupação
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(DiagrammeR)
 grViz("digraph flowchart {
@@ -280,11 +280,11 @@ grViz("digraph flowchart {
       ")
 ```
 
-> 2. Modelo global de ocupação
+### 2. Modelo global de ocupação
 
 Mais uma vez será usada a função `occu()`, porém desta vez a ocupação não será fixa. Escreva um modelo global para a ocupação com base nas variáveis que poderiam estar influenciando a ocupação da espécie. Repita a função do modelo de detecção utilizado na etapa 1.2, de agora em diante a detecção será fixa, e será avaliada apenas a ocupação.
 
-```{r}
+```{r eval=FALSE}
 # 4.1. Avalie os modelos de ocupação ####
 # Use o modelo de detecção selecionado na etapa anterior 
 # ( ~ detecção ~ ocupação)
@@ -297,7 +297,7 @@ View(dd.ocu.cfm) # Ordenado pelo AICc
 ```
 
 
-> 2.1.B1 Caso mais de um modelo tenha sido selecionado
+### 2.1.B1 Caso mais de um modelo tenha sido selecionado
 
 ```{r gerando os modelos ocupação, echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
@@ -322,7 +322,7 @@ dd.ocu.cfm.sub # Ordered by AIC
 
 Neste caso é necessário seguir para a etapa 2.1.B2
 
-> 2.1.B2 Avaliar as covariáveis isoladamente
+### 2.1.B2 Avaliar as covariáveis isoladamente
 
 ```{r etapa intermediaria ocupação, echo=FALSE, message=FALSE, warning=FALSE}
 x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
@@ -368,12 +368,10 @@ OCU.importancia.var.cfm
 
 
 
+### 2.1.A Caso apenas um modelo seja explicativo
 
 
-> 2.1.A Caso apenas um modelo seja explicativo
-
-
-> 2.2. Predição com base modelo de ocupação
+### 2.2. Predição com base modelo de ocupação
 
 ```{r eval=FALSE}
 ocu.sel.cfm <-
@@ -404,6 +402,37 @@ colMeans(ocu.pred.cfm)
 ```
 
 
+# Outputs
+O número de outputs vai depender da espécie. O máximo são de 11 outputs, todos em .csv. Para visualizar os resultados use o script 2-manipulating-output.R
+
+1. Predição do modelo de detecção final
+2. Predição do modelo de detecção final por site
+3. Predição do modelo de ocupação final
+4. Predição do modelo de ocupação final por site
+5. Modelos de detecção p(.), p(t), p(var)
+6. Modelos de detecção com base nas variáveis p(var)
+7. Influência das covariáveis na detecção
+8. Modelos de ocupação
+9. Influência das covariáveis na ocupação
+10. Gráfico da influência das covariáveis na detecção
+11. Gráfico da influência das covariáveis na ocupação
+
+_____
+
+* Os modelos 1-5 e 8 são comuns a todas as espécies
+
+* Os modelos 6, 7 e 10 serão gerados apenas para espécies em que a detecção foi influenciada pelas variáveis.
+
+* Os modelos 9 e 11 serão gerados apenas para as espécies em que mais de um modelo for explicativo para a ocupação.
+
+
+# Escrevendo resultado final
+
+Use o script **2-manipulating-output.R** para juntar os outputs num único arquivo. 
+
+É necessário modificar os diretórios e  nomes dos arquivos, usando a estrutura de pastas sugerida basta apenas modificar o nome do arquivo.
+
+# Referências
 
 
 
