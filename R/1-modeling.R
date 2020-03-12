@@ -58,26 +58,6 @@ ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm   # Ordered by AIC
 
 
-# 3.1.1. Exporting list of detection models ----
-# As the modSel output is S4 class method it is not possible to coerse it to dataframe and export
-# Fill the dataframe according to the modSel
-det_list_df <- data.frame(
-  nPars = c(2, 7, 5),
-  AIC = c(126.65, 128.49, 133.92),
-  delta = c(0.00, 1.84, 7.27),
-  AICwt = c(0.701, 0.280, 0.019),
-  cumltvWt = c(0.70, 0.98, 1.00),
-  Species = "sp3",
-  row.names = c("psi(.)p(.)", "psi(.)p(var)", "psi(.)p(t)")
-)
-det_list_df
-write.table(
-  det_list_df,
-  file = "./output/detection-models-10x1-sp4.csv",
-  sep = ",",
-  row.names = TRUE,
-  col.names = NA
-)
 # 3.2. Intermediate step -----
 # If the detection model selected is influenced by the covariates "psi(.)p(var)", then it is necessary to disintegrate the function dec3 according to Akaike criterion
 dd.cfm <- dredge(dec3.cfm)
@@ -488,3 +468,27 @@ binomnames.ocu <-
   )))
 title(binomnames.ocu, line = 1, outer = TRUE)
 dev.off()
+
+# 3.7 Exporting list of detection models ----
+# As the modSel output is S4 class method it is not possible to coerse it to dataframe and export
+# Fill the dataframe according to the modSel
+
+ms.dec.cfm
+
+det_list_df <- data.frame(
+  nPars = c(2, 7, 5),
+  AIC = c(126.65, 128.49, 133.92),
+  delta = c(0.00, 1.84, 7.27),
+  AICwt = c(0.701, 0.280, 0.019),
+  cumltvWt = c(0.70, 0.98, 1.00),
+  Species = "sp3",
+  row.names = c("psi(.)p(.)", "psi(.)p(var)", "psi(.)p(t)")
+)
+det_list_df
+write.table(
+  det_list_df,
+  file = "./output/detection-models-10x1-sp4.csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
