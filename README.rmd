@@ -1,15 +1,9 @@
 ---
 title: "Modelagem de ocupação single-season "
 author: "Inês Motta Comarella"
-output: 
-  rmdformats::material:
-    self_contained: TRUE
-    thumbnails: TRUE
-    lightbox: TRUE
-    gallery: FALSE
-    highlight: tango
-    cards: FALSE
+output: md_document
 bibliography: doc/bibliography.bib
+always_allow_html: true
 ---
 
 # Introdução
@@ -67,7 +61,7 @@ Script para a leitura dos arquivos em excel, logo é necessário adaptação em 
 
 
 # Modelagem
-Após o input dos dados e a preparação dos mesmos vem o principal, que é a modelagem. 
+Após o input e a preparação dos dados vem o principal, que é a modelagem. 
 Ela é dividida em duas etapas, na primeira é estimada a probabilidade de detectar a espécie e essa probabilidade é usada em uma segunda etapa para estimar o parâmetro da ocupação. 
 
 A forma como iremos nos referir aos modelos será por `psi()p()`, esta função irá descrever as variáveis explanatórias da detecção -`psi()`- e da ocupação -`p()`. A ausência de variáveis (modelo nulo) será descrita como `psi(.)p(.)`
@@ -218,7 +212,7 @@ ms.dec.cfm   # Ordered by AIC
 A seleção da melhor combinação de variáveis que descreverá o modelo de detecção final envolve o rankeamento dos modelos de detecção com todas as combinações de covariáveis do modelo global. Para isso usaremos a função `dredge(global.model)`, que gera uma tabela de seleção de modelos com combinações (subconjuntos) de termos de efeito fixo no modelo global. Sendo que o modelo global é o modelo gerado pela função `occu()`.
 
 ```{r eval=FALSE}
-# 3.2. Etapda Intermediária -----
+# 3.2. Etapa Intermediária -----
 # Caso o modelo selecionado seja determinado pelas covariáveis psi(.)p(var), então é necessário desagregar a função dec3
 # 
 dd.cfm <- dredge(dec3.cfm)
@@ -587,7 +581,7 @@ OCU.importancia.var.cfm
 
 Para visualizar graficamente basta plotar o gráfico no final do script, na sessão de exportar outputs.
 ____
-Esta etapa gera 2 outputs, a tabela com a média e desvio padrão das variáveis separadamente e o gráfico com as mesmas mésdias e desvios padrões.
+Esta etapa gera 2 outputs, a tabela com a média e desvio padrão das variáveis separadamente e o gráfico com as mesmas médias e desvios padrões.
 
 ### 2.1.A Caso apenas um modelo seja explicativo
 Neste caso apenas prossiga para a etapa final de predição, **etapa 2.2**.
