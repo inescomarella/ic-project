@@ -1,6 +1,3 @@
-title: "Modelagem de ocupação single-season "
-author: "Inês Motta Comarella"
-
 Introdução
 ==========
 
