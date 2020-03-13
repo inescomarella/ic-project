@@ -42,7 +42,6 @@ O script segue uma estrutura de pastas relativa, como segue:
     ├── _R
     |   ├── 1-modeling.R
     |   └── 2-manipulating-output.R
-    |
     ├── _data
     |   ├── VariaveisExp.xlsx
     |   └── occu-7x1.xlsx
@@ -370,16 +369,27 @@ todos em .csv. Para visualizar os resultados use o script
 2-manipulating-output.R
 
 1.  Predição do modelo de detecção final
+        + ./output/detection-final-7x1-sp1-p().csv
 2.  Predição do modelo de detecção final por site
+        + ./output/detection-persite-7x1-sp1-p().csv
 3.  Predição do modelo de ocupação final
+        + ./output/occupancy-final-7x1-sp1-p()psi().csv
 4.  Predição do modelo de ocupação final por site
+        + ./output/occupancy-persite-7x1-sp1-p()psi().csv
 5.  Modelos de detecção p(.), p(t), p(var)
+        + ./output/detection-models-7x1-sp1.csv
 6.  Modelos de detecção com base nas variáveis p(var)
+        + ./output/detection-pVar-7x1-sp1.csv
 7.  Influência das covariáveis na detecção
+        + ./output/detection-covariates-7x1-sp1.csv
 8.  Modelos de ocupação
+        + ./output/occupancy-psiVar-7x1-sp1.csv
 9.  Influência das covariáveis na ocupação
+        + ./output/occupancy-covariates-7x1-sp1.csv
 10. Gráfico da influência das covariáveis na detecção
+        + ./figs/detection-covariates-7x1-sp1.png
 11. Gráfico da influência das covariáveis na ocupação
+        + ./figs/occupancy-covariates-7x1-sp1.png
 
 ------------------------------------------------------------------------
 
