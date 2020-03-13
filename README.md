@@ -383,12 +383,12 @@ todos em .csv. Para visualizar os resultados use o script
 
 ------------------------------------------------------------------------
 
--   Os modelos 1-5 e 8 são comuns a todas as espécies
+-   Os outputs 1-5 e 8 são comuns a todas as espécies
 
--   Os modelos 6, 7 e 10 serão gerados apenas para espécies em que a
+-   Os outputs 6, 7 e 10 serão gerados apenas para espécies em que a
     detecção foi influenciada pelas variáveis.
 
--   Os modelos 9 e 11 serão gerados apenas para as espécies em que mais
+-   Os outputs 9 e 11 serão gerados apenas para as espécies em que mais
     de um modelo for explicativo para a ocupação.
 
 Escrevendo resultado final
