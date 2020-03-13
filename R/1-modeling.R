@@ -7,7 +7,9 @@
 x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
 lapply(x, library, character.only = TRUE)
 
-# 1. Importando as variáveis explanatórias =====
+# 1. IMPORTANDO OS DADOS =====
+
+# 1.1. Importando as variáveis explanatórias =====
 # Esta primeira etapa é igual para todas as espécies
 
 VariaveisExp <-
@@ -23,22 +25,20 @@ Var <-
   decostand(Var, method = "standardize", MARGIN = 2)
 
 
-# 2. Importando a tabela com histórico de detecção =====
-
-# 2.1. Importando a tabela -----
+# 1.2. Importando a tabela com histórico de detecção =====
 cfm <- read_excel("./data/occu-7x1.xlsx",
                   sheet = "sp1")
 cfm <- cfm[, -1]
 View(cfm)
 
-# 2.2. Matriz para ser lida pelo unmarked -----
+# Matriz para ser lida pelo unmarked
 cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
 summary(cfm.umf)
 
 
-# 3. MODELANDO DA DETECÇÃO =====
+# 2. MODELANDO DA DETECÇÃO =====
 
-# 3.1. Avaliando os modelos de detecção -----
+# 2.1. Avaliando os modelos de detecção -----
 # Modelo nulo p(.), viés de tempo de detecção p(t), viés pelas variáveis p(var)
 
 dec1.cfm <- occu( ~ 1 ~ 1, cfm.umf)
@@ -55,7 +55,7 @@ dec.list.cfm <-
 ms.dec.cfm <- modSel(dec.list.cfm)
 ms.dec.cfm # Ordenado pelo AIC
 
-# 3.2. Etapa intermediária -----
+# 2.2. Etapa intermediária -----
 # Caso seja selecionado o psi(.)p(var) gere os modelos de detecção a partir da combinação das variáveis do modelo global
 
 dd.cfm <- dredge(dec3.cfm)
@@ -84,7 +84,7 @@ for (i in 1:5) {
 }
 View(importancia.var.cfm)
 
-# 3.3. Modelo de detecção final -----
+# 2.3. Modelo de detecção final -----
 # ~ detection ~ occupancy, fize a ocupação como nula
 
 #Apenas para lembrar as covariáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ 1
@@ -97,7 +97,7 @@ colMeans(det.cfm.pred[, 1:4])
 
 
 
-# 3.3.1. Exportando a predição do modelo de detecção ----
+# 2.3.1. Exportando a predição do modelo de detecção ----
 # Especificando a espécie na tabela
 dec.sel.cfm # confere o modelo
 
@@ -119,7 +119,7 @@ write.table(
   col.names = NA
 )
 
-# 3.3.2. Exportando a predição da detecção por site ----
+# 2.3.2. Exportando a predição da detecção por site ----
 det_persite_sp <- cbind(det.cfm.pred, sp_det_model)
 
 write.table(
@@ -130,9 +130,9 @@ write.table(
   row.names = TRUE,
   col.names = NA
 )
-# 4. MODELANDO A OCUPAÇÃO =====
+# 3. MODELANDO A OCUPAÇÃO =====
 
-# 4.1. Avaliando os modelos de ocupação ####
+# 3.1. Avaliando os modelos de ocupação ####
 # Use o modelo de detecção selecionado na etapa anterior
 # occu( ~ detecção ~ ocupação)
 # Paenas para lembrar as coraviáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
@@ -143,7 +143,7 @@ dd.ocu.cfm <- dredge(ocu.cfm)
 View(dd.ocu.cfm) # Ordenado pelo AIC
 
 
-# 4.2. Etapa intermediária -----
+# 3.2. Etapa intermediária -----
 # Caso mais de um modelo tenha sido selecionado, avalie e selecione as covariáveis com base na influência das mesma nos modelos
 table.ocu <- as.matrix(dd.ocu.cfm)
 OCU.importancia.var.cfm <- matrix(NA, nrow = ncol(table.ocu) - 5, ncol = 6)
@@ -167,7 +167,7 @@ for (i in 1:(ncol(table.ocu) - 5)) {
 
 View(OCU.importancia.var.cfm)
 
-# 4.3. Modelo de ocupação final -----
+# 3.3. Modelo de ocupação final -----
 # occu( ~ detecção ~ ocupação)
 # Apenas para lembrar as covariáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
 
@@ -177,7 +177,7 @@ ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
 colMeans(ocu.pred.cfm)
 
 
-# 4.3.1. Exportando a predição do modelo de detecção final ----
+# 3.3.1. Exportando a predição do modelo de detecção final ----
 ocu.sel.cfm # confere o modelo
 
 # Especificando a espécie e o modelo na tabela
@@ -198,7 +198,7 @@ write.table(
   col.names = NA
 )
 
-# 4.3.2. Exportando a predição do modelo de detecção final por site ----
+# 3.3.2. Exportando a predição do modelo de detecção final por site ----
 # Especificando a espécie e o modelo na tabela
 occu_persite_sp <- cbind(ocu.pred.cfm, sp_occu_model)
 
@@ -211,7 +211,7 @@ write.table(
   col.names = NA
 )
 #++++++++++++++++++++++++++
-# 5. EXPORTANDO OS OUTPUTS ----
+# 5. EXPORTANDO OS OUTPUTS =====
 
 Species <- "sp1"
 
