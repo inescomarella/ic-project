@@ -97,7 +97,7 @@ writeData(wb, "det_persite", det_persite)
 writeData(wb, "det_models", det_models)
 writeData(wb, "det_cov", det_cov)
 writeData(wb, "det_pVar", det_pVar)
-saveWorkbook(wb, "./results/result-detection-7x1.xlsx")
+saveWorkbook(wb, "./results/result-7x1.xlsx")
 
 # Abrindo o arquivo com os resultados ----
 openXL("./results/result-7x1.xlsx")
