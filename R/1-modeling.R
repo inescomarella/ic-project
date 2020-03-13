@@ -97,39 +97,6 @@ colMeans(det.cfm.pred[, 1:4])
 
 
 
-# 2.3.1. Exportando a predição do modelo de detecção ----
-# Especificando a espécie na tabela
-dec.sel.cfm # confere o modelo
-
-sp_det_model <- matrix(NA, nrow = 1, ncol = 2)
-colnames(sp_det_model) <- c("Species", "Model")
-sp_det_model[,1] <- "sp1" # especifica a espécie
-sp_det_model[,2] <- "p(RAI_Hum)" # especifica o modelo
-
-det_final <- t(colMeans(det.cfm.pred[, 1:4])) # prepara a tabela
-det_final_sp <- cbind(det_final, sp_det_model) # identifica a espécie e o modelo da tabela
-det_final_sp # confere
-
-write.table(
-  det_final_sp,
-  file =
-    "./output/detection-final-7x1-sp1-p(RAI_Hum).csv",
-  sep = ",",
-  row.names = TRUE,
-  col.names = NA
-)
-
-# 2.3.2. Exportando a predição da detecção por site ----
-det_persite_sp <- cbind(det.cfm.pred, sp_det_model)
-
-write.table(
-  det_persite_sp,
-  file =
-    "./output/detection-persite-7x1-sp1-p(RAI_Hum).csv",
-  sep = ",",
-  row.names = TRUE,
-  col.names = NA
-)
 # 3. MODELANDO A OCUPAÇÃO =====
 
 # 3.1. Avaliando os modelos de ocupação ####
@@ -177,7 +144,50 @@ ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
 colMeans(ocu.pred.cfm)
 
 
-# 3.3.1. Exportando a predição do modelo de detecção final ----
+# 5. EXPORTANDO OS OUTPUTS =====
+
+Species <- "sp1"
+
+# Identificando as espécies
+sp_name <- read_excel("./data/species-names.xlsx")
+sp_name
+
+# 5.1. Exportando a predição do modelo de detecção ----
+# Especificando a espécie na tabela
+dec.sel.cfm # confere o modelo
+
+sp_det_model <- matrix(NA, nrow = 1, ncol = 2)
+colnames(sp_det_model) <- c("Species", "Model")
+sp_det_model[,1] <- "sp1" # especifica a espécie
+sp_det_model[,2] <- "p(RAI_Hum)" # especifica o modelo
+
+det_final <- t(colMeans(det.cfm.pred[, 1:4])) # prepara a tabela
+det_final_sp <- cbind(det_final, sp_det_model) # identifica a espécie e o modelo da tabela
+det_final_sp # confere
+
+write.table(
+  det_final_sp,
+  file =
+    "./output/detection-final-7x1-sp1-p(RAI_Hum).csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
+
+
+# 5.2. Exportando a predição da detecção por site ----
+det_persite_sp <- cbind(det.cfm.pred, sp_det_model)
+
+write.table(
+  det_persite_sp,
+  file =
+    "./output/detection-persite-7x1-sp1-p(RAI_Hum).csv",
+  sep = ",",
+  row.names = TRUE,
+  col.names = NA
+)
+
+# 5.3. Exportando a predição do modelo de detecção final ----
 ocu.sel.cfm # confere o modelo
 
 # Especificando a espécie e o modelo na tabela
@@ -198,7 +208,8 @@ write.table(
   col.names = NA
 )
 
-# 3.3.2. Exportando a predição do modelo de detecção final por site ----
+
+# 5.4. Exportando a predição do modelo de detecção final por site ----
 # Especificando a espécie e o modelo na tabela
 occu_persite_sp <- cbind(ocu.pred.cfm, sp_occu_model)
 
@@ -211,15 +222,8 @@ write.table(
   col.names = NA
 )
 #++++++++++++++++++++++++++
-# 5. EXPORTANDO OS OUTPUTS =====
 
-Species <- "sp1"
-
-# Identificando as espécies
-sp_name <- read_excel("./data/species-names.xlsx")
-sp_name
-
-# 5.1. Exportando modelos de detecção p(.), p(t), p(var) ----
+# 5.5. Exportando modelos de detecção p(.), p(t), p(var) ----
 ms.dec.cfm
 
 # Como o output gerado pela função modSel é um objeto de classe S4 não é possível simplesmente exportar os dados, então será necessário escrever o dataframe com os dados para serem exportados
@@ -243,7 +247,7 @@ write.table(
 )
 
 
-# 5.2. Exportando modelos de detecção com base nas variáveis p(var)) ----
+# 5.6. Exportando modelos de detecção com base nas variáveis p(var)) ----
 dd.cfm_sp <- cbind(dd.cfm, Species)
 write.table(
   dd.cfm_sp,
@@ -253,7 +257,7 @@ write.table(
   col.names = NA
 )
 
-# 5.3. Exportando influência das covariáveis na detecção ----
+# 5.7. Exportando influência das covariáveis na detecção ----
 importancia.var.cfm_sp <- cbind(importancia.var.cfm, Species)
 write.table(
   importancia.var.cfm_sp,
@@ -263,7 +267,7 @@ write.table(
   col.names = NA
 )
 
-# 5.4. Exportando modelos de ocupação ----
+# 5.8. Exportando modelos de ocupação ----
 dd.ocu.cfm_sp <- cbind(dd.ocu.cfm, Species)
 write.table(
   dd.ocu.cfm_sp,
@@ -272,7 +276,7 @@ write.table(
   row.names = TRUE,
   col.names = NA
 )
-# 5.5. Exportando influência das covariáveis na ocupação ----
+# 5.9. Exportando influência das covariáveis na ocupação ----
 OCU.importancia.var.cfm_sp <-
   cbind(OCU.importancia.var.cfm, Species)
 write.table(
@@ -283,7 +287,7 @@ write.table(
   col.names = NA
 )
 
-# 5.6. Gráfico da influência das covariáveis na detecção ----
+# 5.10. Gráfico da influência das covariáveis na detecção ----
 png(
   "figs/detection-covariates-7x1-sp1.png",
   res = 300,
@@ -390,7 +394,7 @@ dev.off()
 
 
 
-# 5.7. Gráfico da influência das covariáveis na ocupação ----
+# 5.11. Gráfico da influência das covariáveis na ocupação ----
 png(
   "figs/occupancy-covariates-7x1-sp1.png",
   res = 300,
