@@ -27,7 +27,7 @@ Var <-
 
 # 2.1. Importando a tabela -----
 cfm <- read_excel("./data/occu-7x1.xlsx",
-                  sheet = "sp7")
+                  sheet = "sp1")
 cfm <- cfm[, -1]
 View(cfm)
 
@@ -102,8 +102,8 @@ dec.sel.cfm # confere o modelo
 
 sp_det_model <- matrix(NA, nrow = 1, ncol = 2)
 colnames(sp_det_model) <- c("Species", "Model")
-sp_det_model[,1] <- "sp10" # especifica a espécie
-sp_det_model[,2] <- "p(.)" # especifica o modelo
+sp_det_model[,1] <- "sp1" # especifica a espécie
+sp_det_model[,2] <- "p(var)" # especifica o modelo
 
 det_final <- t(colMeans(det.cfm.pred[, 1:4])) # prepara a tabela
 det_final_sp <- cbind(det_final, sp_det_model) # identifica a espécie e o modelo da tabela
@@ -112,7 +112,7 @@ det_final_sp # confere
 write.table(
   det_final_sp,
   file =
-    "./output/detection-final-10x1-sp10-p(.).csv",
+    "./output/detection-final-7x1-sp1-p(var).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -124,7 +124,7 @@ det_persite_sp <- cbind(det.cfm.pred, sp_det_model)
 write.table(
   det_persite_sp,
   file =
-    "./output/detection-persite-10x1-sp10-p(.).csv",
+    "./output/detection-persite-7x1-sp7-p(var).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -174,7 +174,7 @@ View(OCU.importancia.var.cfm)
 # Apenas para lembrar as covariáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
 
 ocu.sel.cfm <-
-  occu( ~ 1 ~ RS1 + RS3 + RAI_Hum , cfm.umf)
+  occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS3 + RAI_Hum , cfm.umf)
 ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
 colMeans(ocu.pred.cfm)
 
@@ -186,7 +186,7 @@ ocu.sel.cfm # confere o modelo
 sp_occu_model <- matrix(NA, nrow = 1, ncol = 2)
 colnames(sp_occu_model) <- c("Species", "Model")
 sp_occu_model[,1] <- "sp1" # especifica a espécie
-sp_occu_model[,2] <- "p(.)psi(RS1 + RS3 + RAI_Hum)" # especifica o modelo
+sp_occu_model[,2] <- "p(ele + DistBorda_PLAN + RAI_Hum)psi(RS1 + RS3 + RAI_Hum)" # especifica o modelo
 
 occu_final <- t(colMeans(ocu.pred.cfm)) # prepara a tabela
 occu_final_sp <- cbind(occu_final, sp_occu_model) # identifica a espécie o modelo na tabela
@@ -194,7 +194,7 @@ occu_final_sp <- cbind(occu_final, sp_occu_model) # identifica a espécie o mode
 write.table(
   occu_final_sp,
   file =
-    "./output/occupancy-final-10x1-sp1-p(.)psi(RS1-RS3-RAI_Hum).csv",
+    "./output/occupancy-final-7x1-sp1-p(ele-DistBorda_PLAN-RAI_Hum)psi(RS1-RS3-RAI_Hum).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -207,7 +207,7 @@ occu_persite_sp <- cbind(ocu.pred.cfm, sp_occu_model)
 write.table(
   occu_persite_sp,
   file =
-    "./output/occupancy-persite-10x1-sp1-p(.)psi(RS1-RS3-RAI_Hum).csv",
+    "./output/occupancy-persite-7x1-sp1-p(ele-DistBorda_PLAN-RAI_Hum)psi(RS1-RS3-RAI_Hum).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -215,7 +215,7 @@ write.table(
 #++++++++++++++++++++++++++
 # 5. EXPORTANDO OS OUTPUTS ----
 
-Species <- "sp10"
+Species <- "sp1"
 
 # Identificando as espécies
 sp_name <- read_excel("./data/species-names.xlsx")
@@ -238,7 +238,7 @@ det_list_df <- data.frame(
 det_list_df
 write.table(
   det_list_df,
-  file = "./output/detection-models-10x1-sp4.csv",
+  file = "./output/detection-models-7x1-sp1.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -249,7 +249,7 @@ write.table(
 dd.cfm_sp <- cbind(dd.cfm, Species)
 write.table(
   dd.cfm_sp,
-  file = "./output/detection-pVar-10x1-sp10.csv",
+  file = "./output/detection-pVar-7x1-sp1.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -259,7 +259,7 @@ write.table(
 importancia.var.cfm_sp <- cbind(importancia.var.cfm, Species)
 write.table(
   importancia.var.cfm_sp,
-  file = "./output/detection-covariates-10x1-sp10.csv",
+  file = "./output/detection-covariates-7x1-sp1.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -269,7 +269,7 @@ write.table(
 dd.ocu.cfm_sp <- cbind(dd.ocu.cfm, Species)
 write.table(
   dd.ocu.cfm_sp,
-  file = "./output/occupancy-psiVar-10x1-sp3.csv",
+  file = "./output/occupancy-psiVar-7x1-sp1.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -279,7 +279,7 @@ OCU.importancia.var.cfm_sp <-
   cbind(OCU.importancia.var.cfm, Species)
 write.table(
   OCU.importancia.var.cfm_sp,
-  file = "./output/occupancy-covariates-10x1-sp6.csv",
+  file = "./output/occupancy-covariates-7x1-sp1.csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -287,7 +287,7 @@ write.table(
 
 # 5.6. Gráfico da influência das covariáveis na detecção ----
 png(
-  "figs/detection-covariates-10x1-sp10.png",
+  "figs/detection-covariates-7x1-sp1.png",
   res = 300,
   width = 2400,
   height = 2200
@@ -385,7 +385,7 @@ op <-
 
 binomnames.det <-
   expression(bold(paste(
-    "Variáveis de detecção - ", italic(""), ""
+    "Variáveis de detecção - ", italic("sp1"), ""
   )))
 title(binomnames.det, line = 1, outer = TRUE)
 dev.off()
@@ -394,7 +394,7 @@ dev.off()
 
 # 5.7. Gráfico da influência das covariáveis na ocupação ----
 png(
-  "figs/occupancy-covariates-10x1-sp1.png",
+  "figs/occupancy-covariates-7x1-sp1.png",
   res = 300,
   width = 2400,
   height = 2200
@@ -490,7 +490,7 @@ op <-
 
 binomnames.ocu <-
   expression(bold(paste(
-    "Variáveis de ocupação - ", italic("Canis lupus familiaris"), ""
+    "Variáveis de ocupação - ", italic("sp1"), ""
   )))
 title(binomnames.ocu, line = 1, outer = TRUE)
 dev.off()
