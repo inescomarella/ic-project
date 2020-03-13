@@ -361,7 +361,7 @@ op <-
     uiw = importancia.var.cfm[, 6],
     yaxt = "n",
     xaxt = "n",
-    ylab = "delta",
+    ylab = "delta AIC",
     xlab = NA,
     mgp = c(2, 1, 0)
   )
@@ -466,7 +466,7 @@ op <-
     uiw = OCU.importancia.var.cfm[, 6],
     yaxt = "n",
     xaxt = "n",
-    ylab = "delta",
+    ylab = "delta AIC",
     xlab = NA,
     mgp = c(1.75, 1, 0)
   )
