@@ -1,0 +1,159 @@
+---
+title: "Metadata"
+author: "Inês Motta Comarella"
+date: "29/02/2020"
+output: html_document
+bibliography: bibliography.bib
+---
+
+
+> char.xlsx
+
+O arquivo contém caracteríticas morfológicas das 10 espécies de carnívoros registradas pelas armadilhas fotográficas em Sta Mª de Jetibá. Os dados utilizidados para montar esta planilha possui diversas origens e por isso senti a necessidade de registrar sua elaboração. Em trabalhos que não disponibilizavam os dados das medidas individuais foi utilizado preferencialmente os valores mínimos e máximos, como uma forma de considerar a medição de pelo menos 2 indivíduos isoladamente, nos casos em que apenas a média é disponilizada então a ela foi considerada como medida de um indivíduo. 
+
+
+**body-weight**
+
+Massa corporal em kg.
+
+* Canis lupus familiaris
+    1. @Plishka1992 (N = 51): Foram utilizadas diferentes raças
+    
+* Cerdocyon thous
+    1. @Macdonald1996 (N = 4): mínimo e máximo de machos e fêmeas.
+    2. @Maffei2003 (N = 2)
+    3. @Valkenburgh1990 (N = 2)
+
+* Eira barbara
+    1. @Richard-Hansen1999 (N = 2): mínimo e máximo.
+    2. @Emmons1997 (apud @Presley2000) (N = 2): mínimo e máximo.
+    3. @Talamoni2017 (N = 6)
+    4. @Grzimek2004: mínimo e máximo, não específica o n amostral.
+
+* Felis catus
+    1. @Venables2002: dataset de peso de gatos do pacote MASS
+
+* Galictis cuja
+    1. @Anderson.S1997: não foi específico quanto ao n amostral
+    2. @Redford1992 (apud @Yensen2003) (N = 2): mínimo e máximo.
+    3. @Yensen2003 (N = 2): mínimo e máximo.
+    
+* Herpailurus yagouaroundi
+    1. @Richard-Hansen1999 (N = 1)
+    2. @Valkenburgh1990 (N = 1)
+
+* Leopardus guttulus
+
+* Leopardus pardalis
+    1. @Grzimek2004: mínimo e máximo, não específica o n amostral.
+
+* Procyon cancrivorus
+    1. @Richard-Hansen1999 (N = 2): mínimo e máximo.
+
+* Lontra longicaudis
+
+
+**can-h**
+
+Altura do canino superior (em mm) da ponta do canino à linha gengival. Foram excluídos caninos muito desgastados ou com o ápice quebrado.
+As medidas foram feitas por mim por meio de paquímetro eletrônico. Cada indíviduo teve ambos os caninos superiores medidos e cada canino foi medido três vezes (nos exemplares do MBML) e quatro vezes (nos exemplares da UFES-MAM). Foram utilizados apenas caninos completamente emergidos e da dentição permanente.
+
+* Canis lupus familiaris
+    + @Plishka1992 (N = 51): Foram utilizadas diferentes raças
+
+* Cerdocyon thous
+    + UFES-MAM 1223, UFES-MAM 1513
+    
+* Eira barbara
+    + MBML 2508, MBML 2017, MBML 3006, MBML 2345, MBML 1875, MBML 2440, MBML 2066
+    
+* Felis catus
+* Galictis cuja
+    + UFES-MAM 1546, UFES-MAM 1547
+
+* Herpailurus yagouaroundi
+    + UFES-MAM 1514, UFES-MAM 1224, MBML 1929, MBML 2419
+
+* Leopardus guttulus
+    + MBML 1837, MBML 216, MBML 3021, MBML 2069, MBML 1957, MBML 2452, MBML 395
+    
+* Leopardus pardalis
+
+* Procyon cancrivorus
+    + UFES-MAM 1524, MBML 2351, MBML 1835, MBML 1819, MBML 2779
+
+* Lontra longicaudis
+    + MBML 2652
+    
+**can-ap**
+
+Diâmetro anteroposterior do canino superior (em mm) na altura da linha gengival.
+As medidas foram feitas por mim por meio de paquímetro eletrônico. Cada indíviduo teve ambos os caninos superiores medidos e cada canino foi medido três vezes (nos exemplares do MBML) e quatro vezes (nos exemplares da UFES-MAM). Foram utilizados apenas caninos completamente emergidos e da dentição permanente. 
+
+* Canis lupus familiaris
+    + @Plishka1992 (N = 51): Foram utilizadas diferentes raças
+
+* Cerdocyon thous
+    + UFES-MAM 1223, UFES-MAM 1513
+    
+* Eira barbara
+    + MBML 2508, MBML 2017, MBML 3006, MBML 2345, MBML 1875, MBML 2440, MBML 2066
+    
+* Felis catus
+
+* Galictis cuja
+    + UFES-MAM 1546, UFES-MAM 1547
+
+* Herpailurus yagouaroundi
+    + UFES-MAM 1514, UFES-MAM 1224, MBML 1929, MBML 2419
+
+* Leopardus guttulus
+    + MBML 1837, MBML 216, MBML 3021, MBML 2069, MBML 1957, MBML 2452, MBML 395
+    
+* Leopardus pardalis
+
+* Procyon cancrivorus
+    + UFES-MAM 1524, MBML 2351, MBML 1835, MBML 1819, MBML 2779
+
+* Lontra longicaudis
+    + MBML 2652
+    
+**can-ml**
+
+Diâmetro mediolateral do canino superior (em mm) na altura da linha gengival.
+As medidas foram feitas por mim por meio de paquímetro eletrônico. Cada indíviduo teve ambos os caninos superiores medidos e cada canino foi medido três vezes (nos exemplares do MBML) e quatro vezes (nos exemplares da UFES-MAM). Foram utilizados apenas caninos completamente emergidos e da dentição permanente. 
+  
+* Canis lupus familiaris
+    + @Plishka1992
+
+* Cerdocyon thous
+    + UFES-MAM 1223, UFES-MAM 1513
+    
+* Eira barbara
+    + MBML 2508, MBML 2017, MBML 3006, MBML 2345, MBML 1875, MBML 2440, MBML 2066
+    
+* Felis catus
+
+* Galictis cuja
+    + UFES-MAM 1546, UFES-MAM 1547
+
+* Herpailurus yagouaroundi
+    + UFES-MAM 1514, UFES-MAM 1224, MBML 1929, MBML 2419
+
+* Leopardus guttulus
+    + MBML 1837, MBML 216, MBML 3021, MBML 2069, MBML 1957, MBML 2452, MBML 395
+    
+* Leopardus pardalis
+
+* Procyon cancrivorus
+    + UFES-MAM 1524, MBML 2351, MBML 1835, MBML 1819, MBML 2779
+
+* Lontra longicaudis
+    + MBML 2652  
+
+
+
+
+# References
+
+
