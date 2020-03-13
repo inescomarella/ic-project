@@ -36,7 +36,7 @@ cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
 summary(cfm.umf)
 
 
-# 3. MODELAGEM DA DETECÇÃO =====
+# 3. MODELANDO DA DETECÇÃO =====
 
 # 3.1. Avaliando os modelos de detecção -----
 # Modelo nulo p(.), viés de tempo de detecção p(t), viés pelas variáveis p(var)
@@ -53,7 +53,7 @@ dec.list.cfm <-
     "psi(.)p(var)" = dec3.cfm
   )
 ms.dec.cfm <- modSel(dec.list.cfm)
-View(ms.dec.cfm) # Ordenado pelo AIC
+ms.dec.cfm # Ordenado pelo AIC
 
 # 3.2. Etapa intermediária -----
 # Caso seja selecionado o psi(.)p(var) gere os modelos de detecção a partir da combinação das variáveis do modelo global
@@ -69,10 +69,11 @@ rownames(importancia.var.cfm) <-
 colnames(importancia.var.cfm) <-
   c("coef.mean",
     "coef.sd",
-    "delta.mean",
-    "delta.sd",
     "w.mean",
-    "w.sd")
+    "w.sd",
+    "delta.mean",
+    "delta.sd"
+)
 
 for (i in 1:5) {
   temp <- na.omit(table[, c(i, 9, 10)])
@@ -89,7 +90,7 @@ View(importancia.var.cfm)
 #Apenas para lembrar as covariáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ 1
 
 dec.sel.cfm <-
-  occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ 1, cfm.umf) # escreva aqui a função de detecção final
+  occu( ~ RAI_Hum ~ 1, cfm.umf) # escreva aqui a função de detecção final
 det.cfm.pred <-
   predict(dec.sel.cfm, type = "det", appendData = TRUE)
 colMeans(det.cfm.pred[, 1:4])
@@ -103,7 +104,7 @@ dec.sel.cfm # confere o modelo
 sp_det_model <- matrix(NA, nrow = 1, ncol = 2)
 colnames(sp_det_model) <- c("Species", "Model")
 sp_det_model[,1] <- "sp1" # especifica a espécie
-sp_det_model[,2] <- "p(var)" # especifica o modelo
+sp_det_model[,2] <- "p(RAI_Hum)" # especifica o modelo
 
 det_final <- t(colMeans(det.cfm.pred[, 1:4])) # prepara a tabela
 det_final_sp <- cbind(det_final, sp_det_model) # identifica a espécie e o modelo da tabela
@@ -112,7 +113,7 @@ det_final_sp # confere
 write.table(
   det_final_sp,
   file =
-    "./output/detection-final-7x1-sp1-p(var).csv",
+    "./output/detection-final-7x1-sp1-p(RAI_Hum).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -124,7 +125,7 @@ det_persite_sp <- cbind(det.cfm.pred, sp_det_model)
 write.table(
   det_persite_sp,
   file =
-    "./output/detection-persite-7x1-sp7-p(var).csv",
+    "./output/detection-persite-7x1-sp1-p(RAI_Hum).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -137,36 +138,33 @@ write.table(
 # Paenas para lembrar as coraviáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
 
 ocu.cfm <-
-  occu(~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
+  occu(~ RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum, cfm.umf)
 dd.ocu.cfm <- dredge(ocu.cfm)
 View(dd.ocu.cfm) # Ordenado pelo AIC
 
 
 # 4.2. Etapa intermediária -----
 # Caso mais de um modelo tenha sido selecionado, avalie e selecione as covariáveis com base na influência das mesma nos modelos
-
 table.ocu <- as.matrix(dd.ocu.cfm)
-OCU.importancia.var.cfm <-
-  matrix(NA, nrow = ncol(table.ocu) - 5, ncol =
-           6)
+OCU.importancia.var.cfm <- matrix(NA, nrow = ncol(table.ocu) - 5, ncol = 6)
 rownames(OCU.importancia.var.cfm) <-
   colnames(table.ocu)[1:(ncol(table.ocu) - 5)]
 
 colnames(OCU.importancia.var.cfm) <-
   c("coef.mean",
     "coef.sd",
-    "delta.mean",
-    "delta.sd",
     "w.mean",
-    "w.sd")
+    "w.sd",
+    "delta.mean",
+    "delta.sd")
 
 for (i in 1:(ncol(table.ocu) - 5)) {
-  temp <- na.omit(table.ocu[, c(i, 9, 10)])
+  temp <- na.omit(table[, c(i, 9, 10)])
   sd.t <- apply(temp, 2, sd)
   mean.t <- apply(temp, 2, mean)
-  OCU.importancia.var.cfm[i, ] <-
-    c(mean.t, sd.t)
+  OCU.importancia.var.cfm[i, ] <- c(mean.t, sd.t)
 }
+
 View(OCU.importancia.var.cfm)
 
 # 4.3. Modelo de ocupação final -----
@@ -174,7 +172,7 @@ View(OCU.importancia.var.cfm)
 # Apenas para lembrar as covariáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
 
 ocu.sel.cfm <-
-  occu( ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS3 + RAI_Hum , cfm.umf)
+  occu( ~ RAI_Hum ~ RS1 , cfm.umf)
 ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
 colMeans(ocu.pred.cfm)
 
@@ -186,7 +184,7 @@ ocu.sel.cfm # confere o modelo
 sp_occu_model <- matrix(NA, nrow = 1, ncol = 2)
 colnames(sp_occu_model) <- c("Species", "Model")
 sp_occu_model[,1] <- "sp1" # especifica a espécie
-sp_occu_model[,2] <- "p(ele + DistBorda_PLAN + RAI_Hum)psi(RS1 + RS3 + RAI_Hum)" # especifica o modelo
+sp_occu_model[,2] <- "p(RAI_Hum)psi(RS1)" # especifica o modelo
 
 occu_final <- t(colMeans(ocu.pred.cfm)) # prepara a tabela
 occu_final_sp <- cbind(occu_final, sp_occu_model) # identifica a espécie o modelo na tabela
@@ -194,7 +192,7 @@ occu_final_sp <- cbind(occu_final, sp_occu_model) # identifica a espécie o mode
 write.table(
   occu_final_sp,
   file =
-    "./output/occupancy-final-7x1-sp1-p(ele-DistBorda_PLAN-RAI_Hum)psi(RS1-RS3-RAI_Hum).csv",
+    "./output/occupancy-final-7x1-sp1-p(RAI_Hum)psi(RS1).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -207,7 +205,7 @@ occu_persite_sp <- cbind(ocu.pred.cfm, sp_occu_model)
 write.table(
   occu_persite_sp,
   file =
-    "./output/occupancy-persite-7x1-sp1-p(ele-DistBorda_PLAN-RAI_Hum)psi(RS1-RS3-RAI_Hum).csv",
+    "./output/occupancy-persite-7x1-sp1-p(RAI_Hum)psi(RS1).csv",
   sep = ",",
   row.names = TRUE,
   col.names = NA
@@ -227,13 +225,13 @@ ms.dec.cfm
 # Como o output gerado pela função modSel é um objeto de classe S4 não é possível simplesmente exportar os dados, então será necessário escrever o dataframe com os dados para serem exportados
 
 det_list_df <- data.frame(
-  nPars = c(2, 7, 5),
-  AIC = c(126.65, 128.49, 133.92),
-  delta = c(0.00, 1.84, 7.27),
-  AICwt = c(0.701, 0.280, 0.019),
-  cumltvWt = c(0.70, 0.98, 1.00),
-  Species = "sp3",
-  row.names = c("psi(.)p(.)", "psi(.)p(var)", "psi(.)p(t)")
+  nPars = c(5, 2, 7),
+  AIC = c(384.75, 416.97, 429.77),
+  delta = c(0.00, 32.22, 45.03),
+  AICwt = c(1.0e+00, 1.0e-07, 1.7e-10),
+  cumltvWt = c(1.00, 1.00, 1.00),
+  Species = "sp1",
+  row.names = c("psi(.)p(var)", "psi(.)p(.)", "psi(.)p(t)")
 )
 det_list_df
 write.table(
@@ -265,7 +263,7 @@ write.table(
   col.names = NA
 )
 
-# 5.4. Esportando modelos de ocupação ----
+# 5.4. Exportando modelos de ocupação ----
 dd.ocu.cfm_sp <- cbind(dd.ocu.cfm, Species)
 write.table(
   dd.ocu.cfm_sp,
@@ -336,7 +334,7 @@ op <-
     uiw = importancia.var.cfm[, 4],
     yaxt = "n",
     xaxt = "n",
-    ylab = "delta AIC",
+    ylab = "weight",
     xlab = NA,
     mgp = c(2, 1, 0)
   )
@@ -363,7 +361,7 @@ op <-
     uiw = importancia.var.cfm[, 6],
     yaxt = "n",
     xaxt = "n",
-    ylab = "weight",
+    ylab = "delta",
     xlab = NA,
     mgp = c(2, 1, 0)
   )
@@ -441,7 +439,7 @@ op <-
     uiw = OCU.importancia.var.cfm[, 4],
     yaxt = "n",
     xaxt = "n",
-    ylab = "Delta AIC",
+    ylab = "weight",
     xlab = NA,
     mgp = c(1.75, 1, 0)
   )
@@ -468,7 +466,7 @@ op <-
     uiw = OCU.importancia.var.cfm[, 6],
     yaxt = "n",
     xaxt = "n",
-    ylab = "Weight",
+    ylab = "delta",
     xlab = NA,
     mgp = c(1.75, 1, 0)
   )
