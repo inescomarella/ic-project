@@ -47,7 +47,7 @@ O script segue uma estrutura de pastas relativa, como segue:
     |   ├── VariaveisExp.xlsx
     |   └── occu-7x1.xlsx
     ├── _outputs
-    |   
+    ├── _figs
     └── _results
 
 Inputs

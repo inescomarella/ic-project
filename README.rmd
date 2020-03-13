@@ -1,9 +1,15 @@
 ---
 title: "Modelagem de ocupação single-season "
 author: "Inês Motta Comarella"
-output: md_document
+output: 
+  rmdformats::material:
+    self_contained: TRUE
+    thumbnails: TRUE
+    lightbox: TRUE
+    gallery: FALSE
+    highlight: tango
+    cards: FALSE
 bibliography: doc/bibliography.bib
-always_allow_html: true
 ---
 
 # Introdução
@@ -29,19 +35,18 @@ Os dados resultantes para cada site podem ser registrados como um vetor de 1 e 0
 
 # Estrutura de pastas sugerida
 
-O script segue uma estrutura de pastas relativa, como segue:
+O script segue uma estrutura de pastas relativa, como abaixo:
 
 ```
 .
 ├── _R
 |   ├── 1-modeling.R
 |   └── 2-manipulating-output.R
-|
 ├── _data
 |   ├── VariaveisExp.xlsx
 |   └── occu-7x1.xlsx
 ├── _outputs
-|   
+├── _figs   
 └── _results
 ```
 
