@@ -26,24 +26,15 @@ Var <-
 
 
 # 1.2. Importando a tabela com histórico de detecção =====
-cfm.sp7 <- read_excel("./data/occu-7x1.xlsx",
-                  sheet = "sp7")
-cfm.sp7 <- cfm.sp7[, -1]
-cfm.sp8 <- read_excel("./data/occu-7x1.xlsx",
-                      sheet = "sp8")
-cfm.sp8 <- cfm.sp8[, -1]
+cfm <- read_excel("./data/occu-7x1.xlsx",
+                  sheet = "sp1")
+cfm <- cfm[, -1]
 View(cfm)
 
 # Matriz para ser lida pelo unmarked
-cfm.umf.sp7 <- unmarkedFrameOccu(y = cfm.sp7, siteCovs = Var)
-cfm.umf.sp8 <- unmarkedFrameOccu(y = cfm.sp8, siteCovs = Var)
+cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
 summary(cfm.umf)
 
-par(mfrow = c(1, 2))
-sp7 <- plot(cfm.umf.sp7, xlab = "Ocasiões", main="Leopardus guttulus")
-sp8 <- plot(cfm.umf.sp8, xlab = "Ocasiões",  main= "Leopardus pardalis")
-print(sp7, position = c(0, 0.03, 0.5, 1), more = TRUE)
-print(sp8, position = c(0.5, 0.03, 1, 1))
 
 # 2. MODELANDO DA DETECÇÃO =====
 
