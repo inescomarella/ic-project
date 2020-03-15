@@ -26,15 +26,24 @@ Var <-
 
 
 # 1.2. Importando a tabela com histórico de detecção =====
-cfm <- read_excel("./data/occu-7x1.xlsx",
-                  sheet = "sp1")
-cfm <- cfm[, -1]
+cfm.sp7 <- read_excel("./data/occu-7x1.xlsx",
+                  sheet = "sp7")
+cfm.sp7 <- cfm.sp7[, -1]
+cfm.sp8 <- read_excel("./data/occu-7x1.xlsx",
+                      sheet = "sp8")
+cfm.sp8 <- cfm.sp8[, -1]
 View(cfm)
 
 # Matriz para ser lida pelo unmarked
-cfm.umf <- unmarkedFrameOccu(y = cfm, siteCovs = Var)
+cfm.umf.sp7 <- unmarkedFrameOccu(y = cfm.sp7, siteCovs = Var)
+cfm.umf.sp8 <- unmarkedFrameOccu(y = cfm.sp8, siteCovs = Var)
 summary(cfm.umf)
 
+par(mfrow = c(1, 2))
+sp7 <- plot(cfm.umf.sp7, xlab = "Ocasiões", main="Leopardus guttulus")
+sp8 <- plot(cfm.umf.sp8, xlab = "Ocasiões",  main= "Leopardus pardalis")
+print(sp7, position = c(0, 0.03, 0.5, 1), more = TRUE)
+print(sp8, position = c(0.5, 0.03, 1, 1))
 
 # 2. MODELANDO DA DETECÇÃO =====
 
@@ -497,3 +506,38 @@ binomnames.ocu <-
 title(binomnames.ocu, line = 1, outer = TRUE)
 dev.off()
 
+
+# 5.12.A. Gráfico das observações ----
+png(
+  "figs/observations-sp1.png",
+  res = 150,
+  width = 1000,
+  height = 712.5
+)
+plot(cfm.umf, xlab = "Ocasiões", main = expression(bold(paste(
+    italic("sp1")
+  ))))
+
+dev.off()
+
+# 5.12.B. Gráfico das observações (sp7, sp8) ----
+png(
+  "figs/observations-sp1-sp2.png",
+  res = 150,
+  width = 1000,
+  height = 500
+)
+
+par(mfrow = c(1, 2))
+sp1 <-
+  plot(cfm.umf.sp1, xlab = "Ocasiões", main = expression(bold(paste(
+    italic("sp1")
+  ))))
+sp2 <-
+  plot(cfm.umf.sp2, xlab = "Ocasiões",  main = expression(bold(paste(
+    italic("sp2")
+  ))))
+print(sp1, position = c(0, 0.03, 0.5, 1), more = TRUE)
+print(sp2, position = c(0.5, 0.03, 1, 1))
+
+dev.off()
