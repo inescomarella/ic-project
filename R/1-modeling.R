@@ -512,6 +512,18 @@ plot(cfm.umf, xlab = "Ocasiões", main = expression(bold(paste(
 dev.off()
 
 # 5.12.B. Gráfico das observações (sp7, sp8) ----
+cfm.sp1 <- read_excel("./data/occu-7x1.xlsx",
+                  sheet = "sp1")
+cfm.sp2 <- read_excel("./data/occu-7x1.xlsx",
+                  sheet = "sp2")
+cfm.sp1 <- cfm.sp1[, -1]
+cfm.sp2 <- cfm.sp2[, -1]
+
+# Matriz para ser lida pelo unmarked
+cfm.umf.sp1 <- unmarkedFrameOccu(y = cfm.sp1, siteCovs = Var)
+cfm.umf.sp2 <- unmarkedFrameOccu(y = cfm.sp2, siteCovs = Var)
+
+
 png(
   "figs/observations-sp1-sp2.png",
   res = 150,
