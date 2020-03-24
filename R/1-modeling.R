@@ -6,6 +6,7 @@
 # 0. Carregando pacotes  -----
 x <- c("readxl", "vegan", "unmarked", "MuMIn", "plotrix")
 lapply(x, library, character.only = TRUE)
+source("plot-function.R")
 
 # 1. IMPORTANDO OS DADOS =====
 
@@ -84,6 +85,11 @@ for (i in 1:5) {
 }
 View(importancia.var.cfm)
 
+# Plotando num gráfico
+plot.angle.label(importancia.var.cfm, importancia.var.cfm[,1], importancia.var.cfm[,2], "Coeficiente de regressão")
+plot.angle.label(importancia.var.cfm, importancia.var.cfm[,3], importancia.var.cfm[,4], "Peso")
+plot.angle.label(importancia.var.cfm, importancia.var.cfm[,5], importancia.var.cfm[,6], "Delta AICc")
+
 # 2.3. Modelo de detecção final -----
 # ~ detection ~ occupancy, fize a ocupação como nula
 
@@ -134,6 +140,11 @@ for (i in 1:(ncol(table.ocu) - 5)) {
 
 View(OCU.importancia.var.cfm)
 
+# Plotando num gráfico
+plot.angle.label(OCU.importancia.var.cfm, OCU.importancia.var.cfm[,1], OCU.importancia.var.cfm[,2], "Coeficiente de regressão")
+plot.angle.label(OCU.importancia.var.cfm, OCU.importancia.var.cfm[,3], OCU.importancia.var.cfm[,4], "Peso")
+plot.angle.label(OCU.importancia.var.cfm, OCU.importancia.var.cfm[,5], OCU.importancia.var.cfm[,6], "Delta AICc")
+
 # 3.3. Modelo de ocupação final -----
 # occu( ~ detecção ~ ocupação)
 # Apenas para lembrar as covariáveis: ~ ele + DistBorda_PLAN + RAI_Hum ~ RS1 + RS2 + RS3 + RAI_Hum
@@ -144,7 +155,7 @@ ocu.pred.cfm <- predict(ocu.sel.cfm, type = "state")
 colMeans(ocu.pred.cfm)
 
 
-# 5. EXPORTANDO OS OUTPUTS =====
+# 4. EXPORTANDO OS OUTPUTS =====
 
 Species <- "sp1"
 
@@ -152,7 +163,7 @@ Species <- "sp1"
 sp_name <- read_excel("./data/species-names.xlsx")
 sp_name
 
-# 5.1. Exportando a predição do modelo de detecção ----
+# 4.1. Exportando a predição do modelo de detecção ----
 # Especificando a espécie na tabela
 dec.sel.cfm # confere o modelo
 
@@ -175,7 +186,7 @@ write.table(
 )
 
 
-# 5.2. Exportando a predição da detecção por site ----
+# 4.2. Exportando a predição da detecção por site ----
 det_persite_sp <- cbind(det.cfm.pred, sp_det_model)
 
 write.table(
@@ -187,7 +198,7 @@ write.table(
   col.names = NA
 )
 
-# 5.3. Exportando a predição do modelo de detecção final ----
+# 4.3. Exportando a predição do modelo de ocupação final ----
 ocu.sel.cfm # confere o modelo
 
 # Especificando a espécie e o modelo na tabela
@@ -209,7 +220,7 @@ write.table(
 )
 
 
-# 5.4. Exportando a predição do modelo de detecção final por site ----
+# 4.4. Exportando a predição da ocupação por site ----
 # Especificando a espécie e o modelo na tabela
 occu_persite_sp <- cbind(ocu.pred.cfm, sp_occu_model)
 
@@ -223,7 +234,7 @@ write.table(
 )
 #++++++++++++++++++++++++++
 
-# 5.5. Exportando modelos de detecção p(.), p(t), p(var) ----
+# 4.5. Exportando modelos de detecção p(.), p(t), p(var) ----
 ms.dec.cfm
 
 # Como o output gerado pela função modSel é um objeto de classe S4 não é possível simplesmente exportar os dados, então será necessário escrever o dataframe com os dados para serem exportados
@@ -247,7 +258,7 @@ write.table(
 )
 
 
-# 5.6. Exportando modelos de detecção com base nas variáveis p(var)) ----
+# 4.6. Exportando modelos de detecção com base nas variáveis p(var) ----
 dd.cfm_sp <- cbind(dd.cfm, Species)
 write.table(
   dd.cfm_sp,
@@ -257,7 +268,7 @@ write.table(
   col.names = NA
 )
 
-# 5.7. Exportando influência das covariáveis na detecção ----
+# 4.7. Exportando influência das covariáveis na detecção ----
 importancia.var.cfm_sp <- cbind(importancia.var.cfm, Species)
 write.table(
   importancia.var.cfm_sp,
@@ -267,7 +278,7 @@ write.table(
   col.names = NA
 )
 
-# 5.8. Exportando modelos de ocupação ----
+# 4.8. Exportando modelos de ocupação ----
 dd.ocu.cfm_sp <- cbind(dd.ocu.cfm, Species)
 write.table(
   dd.ocu.cfm_sp,
@@ -276,7 +287,7 @@ write.table(
   row.names = TRUE,
   col.names = NA
 )
-# 5.9. Exportando influência das covariáveis na ocupação ----
+# 4.9. Exportando influência das covariáveis na ocupação ----
 OCU.importancia.var.cfm_sp <-
   cbind(OCU.importancia.var.cfm, Species)
 write.table(
@@ -287,103 +298,22 @@ write.table(
   col.names = NA
 )
 
-# 5.10. Gráfico da influência das covariáveis na detecção ----
+# 4.10. Gráfico da influência das covariáveis na detecção ----
 png(
   "figs/detection-covariates-7x1-sp1.png",
   res = 300,
   width = 2400,
   height = 2200
 )
-par(mfrow = c(2, 2))
 op <-
   par(
     mfrow = c(2, 2),
     mar = c(4.1, 3.1, 1, 1.1),
-    oma = c(0.5, 0.5, 4, 0.5),
-    xpd = NA
+    oma = c(0.5, 0.5, 4, 0.5)
   )
-
-{
-  plotCI(
-    x = 1:5,
-    y = importancia.var.cfm[, 1],
-    uiw = importancia.var.cfm[, 2],
-    yaxt = "n",
-    xaxt = "n",
-    ylab = "Coeficiente de regressão",
-    xlab = NA,
-    mgp = c(2, 1, 0)
-  )
-  axis(side = 1,
-       at = seq(1, 5),
-       labels = FALSE)
-  axis(side = 2,
-       labels = TRUE,
-       cex.axis = 0.7,
-  )
-  text(
-    x = seq(1, 5, by = 1),
-    par("usr")[3] - 0.25,
-    labels = rownames(importancia.var.cfm),
-    cex = 0.73,
-    srt = 25,
-    adj = c(0.8, 1.7)
-  )
-  }
-
-{
-  plotCI(
-    x = 1:5,
-    y = importancia.var.cfm[, 3],
-    uiw = importancia.var.cfm[, 4],
-    yaxt = "n",
-    xaxt = "n",
-    ylab = "weight",
-    xlab = NA,
-    mgp = c(2, 1, 0)
-  )
-  axis(side = 1,
-       at = seq(1, 5),
-       labels = FALSE)
-  axis(side = 2,
-       labels = TRUE,
-       cex.axis = 0.7)
-  text(
-    x = seq(1, 5, by = 1),
-    par("usr")[3],
-    labels = rownames(importancia.var.cfm),
-    cex = 0.73,
-    srt = 25,
-    adj = c(0.8, 1.9)
-  )
-}
-
-{
-  plotCI(
-    x = 1:5,
-    y = importancia.var.cfm[, 5],
-    uiw = importancia.var.cfm[, 6],
-    yaxt = "n",
-    xaxt = "n",
-    ylab = "delta AIC",
-    xlab = NA,
-    mgp = c(2, 1, 0)
-  )
-  axis(side = 1,
-       at = seq(1, 5),
-       labels = FALSE)
-  axis(side = 2,
-       labels = TRUE,
-       cex.axis = 0.7)
-  text(
-    x = seq(1, 5, by = 1),
-    par("usr")[3] - 0,
-    labels = rownames(importancia.var.cfm),
-    cex = 0.73,
-    srt = 25,
-    adj = c(0.8, 1.9)
-  )
-}
+plot.angle.label(importancia.var.cfm, importancia.var.cfm[,1], importancia.var.cfm[,2], "Coeficiente de regressão")
+plot.angle.label(importancia.var.cfm, importancia.var.cfm[,3], importancia.var.cfm[,4], "Peso")
+plot.angle.label(importancia.var.cfm, importancia.var.cfm[,5], importancia.var.cfm[,6], "Delta AICc")
 
 binomnames.det <-
   expression(bold(paste(
@@ -394,102 +324,22 @@ dev.off()
 
 
 
-# 5.11. Gráfico da influência das covariáveis na ocupação ----
+# 4.11. Gráfico da influência das covariáveis na ocupação ----
 png(
   "figs/occupancy-covariates-7x1-sp1.png",
   res = 300,
   width = 2400,
   height = 2200
 )
-par(mfrow = c(2, 2))
 op <-
   par(
     mfrow = c(2, 2),
     mar = c(4.1, 3.1, 1, 1.1),
-    oma = c(0.5, 0.5, 4, 0.5),
-    xpd = NA
+    oma = c(0.5, 0.5, 4, 0.5)
   )
-{
-  plotCI(
-    x = 1:(ncol(table.ocu) - 5),
-    y = OCU.importancia.var.cfm[, 1],
-    uiw = OCU.importancia.var.cfm[, 2],
-    yaxt = "n",
-    xaxt = "n",
-    ylab = "Coeficiente de regressão",
-    xlab = NA,
-    mgp = c(1.75, 0.2, 0)
-  )
-  axis(side = 1,
-       at = seq(1, (ncol(table.ocu) - 5)),
-       labels = FALSE)
-  axis(side = 2,
-       labels = TRUE,
-       cex.axis = 0.7)
-  text(
-    x = seq(1, (ncol(table.ocu) - 5), by = 1),
-    par("usr")[3] - 0.05,
-    labels = rownames(OCU.importancia.var.cfm),
-    cex = 0.73,
-    srt = 45,
-    adj = c(0.95, 1.5)
-  )
-  }
-
-{
-  plotCI(
-    x = 1:(ncol(table.ocu) - 5),
-    y = OCU.importancia.var.cfm[, 3],
-    uiw = OCU.importancia.var.cfm[, 4],
-    yaxt = "n",
-    xaxt = "n",
-    ylab = "weight",
-    xlab = NA,
-    mgp = c(1.75, 1, 0)
-  )
-  axis(side = 1,
-       at = seq(1, (ncol(table.ocu) - 5)),
-       labels = FALSE)
-  axis(side = 2,
-       labels = TRUE,
-       cex.axis = 0.7)
-  text(
-    x = seq(1, (ncol(table.ocu) - 5), by = 1),
-    par("usr")[3] - 0.01,
-    labels = rownames(OCU.importancia.var.cfm),
-    cex = 0.73,
-    srt = 45,
-    adj = c(0.95, 1.5)
-  )
-}
-
-{
-  plotCI(
-    x = 1:(ncol(table.ocu) - 5),
-    y = OCU.importancia.var.cfm[, 5],
-    uiw = OCU.importancia.var.cfm[, 6],
-    yaxt = "n",
-    xaxt = "n",
-    ylab = "delta AIC",
-    xlab = NA,
-    mgp = c(1.75, 1, 0)
-  )
-  axis(side = 1,
-       at = seq(1, (ncol(table.ocu) - 5)),
-       labels = FALSE)
-  axis(side = 2,
-       labels = TRUE,
-       cex.axis = 0.7)
-  text(
-    x = seq(1, (ncol(table.ocu) - 5), by = 1),
-    par("usr")[3] - 0.02,
-    labels = rownames(OCU.importancia.var.cfm),
-    cex = 0.73,
-    srt = 45,
-    adj = c(0.9, 1.5)
-  )
-}
-
+plot.angle.label(OCU.importancia.var.cfm, OCU.importancia.var.cfm[,1], OCU.importancia.var.cfm[,2], "Coeficiente de regressão")
+plot.angle.label(OCU.importancia.var.cfm, OCU.importancia.var.cfm[,3], OCU.importancia.var.cfm[,4], "Peso")
+plot.angle.label(OCU.importancia.var.cfm, OCU.importancia.var.cfm[,5], OCU.importancia.var.cfm[,6], "Delta AICc")
 binomnames.ocu <-
   expression(bold(paste(
     "Variáveis de ocupação - ", italic("sp1"), ""
@@ -498,49 +348,3 @@ title(binomnames.ocu, line = 1, outer = TRUE)
 dev.off()
 
 
-# 5.12.A. Gráfico das observações ----
-png(
-  "figs/observations-sp1.png",
-  res = 150,
-  width = 1000,
-  height = 712.5
-)
-plot(cfm.umf, xlab = "Ocasiões", main = expression(bold(paste(
-    italic("sp1")
-  ))))
-
-dev.off()
-
-# 5.12.B. Gráfico das observações (sp7, sp8) ----
-cfm.sp1 <- read_excel("./data/occu-7x1.xlsx",
-                  sheet = "sp1")
-cfm.sp2 <- read_excel("./data/occu-7x1.xlsx",
-                  sheet = "sp2")
-cfm.sp1 <- cfm.sp1[, -1]
-cfm.sp2 <- cfm.sp2[, -1]
-
-# Matriz para ser lida pelo unmarked
-cfm.umf.sp1 <- unmarkedFrameOccu(y = cfm.sp1, siteCovs = Var)
-cfm.umf.sp2 <- unmarkedFrameOccu(y = cfm.sp2, siteCovs = Var)
-
-
-png(
-  "figs/observations-sp1-sp2.png",
-  res = 150,
-  width = 1000,
-  height = 500
-)
-
-par(mfrow = c(1, 2))
-sp1 <-
-  plot(cfm.umf.sp1, xlab = "Ocasiões", main = expression(bold(paste(
-    italic("sp1")
-  ))))
-sp2 <-
-  plot(cfm.umf.sp2, xlab = "Ocasiões",  main = expression(bold(paste(
-    italic("sp2")
-  ))))
-print(sp1, position = c(0, 0.03, 0.5, 1), more = TRUE)
-print(sp2, position = c(0.5, 0.03, 1, 1))
-
-dev.off()
