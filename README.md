@@ -42,6 +42,8 @@ Lista de arquivos
 
 * R/3-compiling-results.R
 
+* R/plot-function.R
+
 * data/sp.csv
 
 * data/covariates.csv
@@ -55,6 +57,8 @@ Descrição dos arquivos
 * 2-exporting.R: Exporta as tabelas geradas pelo "1-modeling.R" para a pasta "output", e as imagens para a pasta "figs".
 
 * 3-compiling-results.R: Compila os resultados gerados pelo "2-exporting.R" em um arquivo único na pasta "results".
+
+* plot-function.R: Função para gerar gráficos com o eixo x inclinado, lido no "3-compiling-results.R"
 
 * sp.csv: Dados de detecção/não-detecção da espécie. 1 linha para cada site, 1 coluna para cada pesquisa replicada. 1 indica detecção, 0 indica não detecção, células em branco indica sem amostragem.
 
