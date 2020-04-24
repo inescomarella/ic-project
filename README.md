@@ -52,17 +52,17 @@ Lista de arquivos
 Descrição dos arquivos
 =======
 
-* 1-modeling.R: Primeiro script a ser executado, realiza as análises de ocupação de de detecção da espécie. 
+* **1-modeling.R**: Primeiro script a ser executado, realiza as análises de ocupação de de detecção da espécie. 
 
-* 2-exporting.R: Exporta as tabelas geradas pelo "1-modeling.R" para a pasta "output", e as imagens para a pasta "figs".
+* **2-exporting.R**: Exporta as tabelas geradas pelo "1-modeling.R" para a pasta "output", e as imagens para a pasta "figs".
 
-* 3-compiling-results.R: Compila os resultados gerados pelo "2-exporting.R" em um arquivo único na pasta "results".
+* **3-compiling-results.R**: Compila os resultados gerados pelo "2-exporting.R" em um arquivo único na pasta "results".
 
-* plot-function.R: Função para gerar gráficos com o eixo x inclinado, lido no "3-compiling-results.R"
+* **plot-function.R**: Função para gerar gráficos com o eixo x inclinado, lido no "3-compiling-results.R"
 
-* sp.csv: Dados de detecção/não-detecção da espécie. 1 linha para cada site, 1 coluna para cada pesquisa replicada. 1 indica detecção, 0 indica não detecção, células em branco indica sem amostragem.
+* **sp.csv**: Dados de detecção/não-detecção da espécie. 1 linha para cada site, 1 coluna para cada pesquisa replicada. 1 indica detecção, 0 indica não detecção, células em branco indica sem amostragem.
 
-* covariates.csv: Covariáveis para modelos de probabilidade de ocorrência e de detecção. 1 linha para cada site, 1 coluna para cada covariável.
+* **covariates.csv**: Covariáveis para modelos de probabilidade de ocorrência e de detecção. 1 linha para cada site, 1 coluna para cada covariável.
 
 
 
