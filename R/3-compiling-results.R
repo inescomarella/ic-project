@@ -10,37 +10,37 @@ lapply(x, library, character.only = TRUE)
 
 # Lendo os outputs ----
 ## files.path é um vetor de diretórios, não leu os arquivos ainda, tem apenas os diretórios
-occu_final_path <-
+occu_predict_path <-
 list.files(path = "./output",
-           pattern = "occupancy-final",
+           pattern = "occupancy-predict",
            full.names = TRUE)
-occu_final_data <- lapply(occu_final_path, read.csv)
-occu_final <- rbindlist(occu_final_data, fill = TRUE)
+occu_predict_data <- lapply(occu_predict_path, read.csv)
+occu_predict <- rbindlist(occu_predict_data, fill = TRUE)
 
 occu_persite_path <-
 list.files(path = "./output",
-           pattern = "occupancy-persite",
+           pattern = "occupancy-predict-persite",
            full.names = TRUE)
 occu_persite_data <- lapply(occu_persite_path, read.csv)
 occu_persite <- rbindlist(occu_persite_data, fill = TRUE)
 
-occu_psiVar_path <-
+occu_models_path <-
 list.files(path = "./output",
-           pattern = "occupancy-psiVar",
+           pattern = "occupancy-models",
            full.names = TRUE)
-occu_psiVar_data <- lapply(occu_psiVar_path, read.csv)
-occu_psiVar <- rbindlist(occu_psiVar_data, fill =  TRUE)
+occu_models_data <- lapply(occu_models_path, read.csv)
+occu_models <- rbindlist(occu_models_data, fill =  TRUE)
 
-det_final_path <-
+det_predict_path <-
 list.files(path = "./output",
-           pattern = "detection-final",
+           pattern = "detection-predict",
            full.names = TRUE)
-det_final_data <- lapply(det_final_path, read.csv)
-det_final <- rbindlist(det_final_data, fill = TRUE)
+det_predict_data <- lapply(det_predict_path, read.csv)
+det_predict <- rbindlist(det_predict_data, fill = TRUE)
 
 det_persite_path <-
 list.files(path = "./output",
-           pattern = "detection-persite",
+           pattern = "detection-predict-persite",
            full.names = TRUE)
 det_persite_data <- lapply(det_persite_path, read.csv)
 det_persite <- rbindlist(det_persite_data, fill = TRUE)
@@ -54,7 +54,7 @@ det_models <- rbindlist(det_models_data, fill = TRUE)
 
 det_pVar_path <-
 list.files(path = "./output",
-           pattern = "detection-pVar",
+           pattern = "detection-models-pVar",
            full.names = TRUE)
 det_pVar_data <- lapply(det_pVar_path, read.csv)
 det_pVar <- rbindlist(det_pVar_data, fill = TRUE)
@@ -63,20 +63,20 @@ det_pVar <- rbindlist(det_pVar_data, fill = TRUE)
 # Criando o arquivo dos resultado e as abas ----
 wb <- createWorkbook()
 addWorksheet(wb, "det_models", gridLines = FALSE)
-addWorksheet(wb, "det_pVar", gridLines = FALSE)
-addWorksheet(wb, "det_final", gridLines = FALSE)
+addWorksheet(wb, "det_models_pVar", gridLines = FALSE)
+addWorksheet(wb, "det_pred", gridLines = FALSE)
 addWorksheet(wb, "det_persite", gridLines = FALSE)
-addWorksheet(wb, "occu_psiVar", gridLines = FALSE)
-addWorksheet(wb, "occu_final", gridLines = FALSE)
+addWorksheet(wb, "occu_models", gridLines = FALSE)
+addWorksheet(wb, "occu_pred", gridLines = FALSE)
 addWorksheet(wb, "occu_persite", gridLines = FALSE)
 
 # Escrevendo os dados em cada aba ----
 writeData(wb, "det_models", det_models)
-writeData(wb, "det_pVar", det_pVar)
-writeData(wb, "det_final", det_final)
+writeData(wb, "det_models_pVar", det_pVar)
+writeData(wb, "det_pred", det_predict)
 writeData(wb, "det_persite", det_persite)
-writeData(wb, "occu_psiVar", occu_psiVar)
-writeData(wb, "occu_final", occu_final)
+writeData(wb, "occu_models", occu_models)
+writeData(wb, "occu_pred", occu_predict)
 writeData(wb, "occu_persite", occu_persite)
 
 # Estabelecendo o estilo -----
